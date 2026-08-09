@@ -4,7 +4,7 @@ This repository contains raw data, annotated R code, and figures used to analyse
 
 Pollinator visitation surveys were conducted at two sites within Holyrood Park. During each survey, plant and pollinator identity, pollinator visits, floral abundance, time period, and environmental conditions were recorded. Environmental variables included temperature, solar radiation, relative humidity, and wind speed.
 
-Pollinators were identified to the lowest reliable taxonomic level. Bumblebees and butterflies were identified to species where possible, while other pollinators were classified into broader taxonomic groups when reliable species-level identification was not possible.
+Pollinators were identified to the lowest reliable taxonomic level possible in the field.
 
 The data were used to investigate temporal and spatial variation in pollinator visitation, environmental drivers of visitation, differences among pollinator groups, plant species attractiveness, pollinator community composition, and plant–pollinator network structure.
 
