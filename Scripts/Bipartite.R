@@ -1,5 +1,5 @@
 ##################################
-#Plant-pollinator Network Figures
+#Plant-flower visitor Network Figures
 ##################################
 
 library(dplyr)
@@ -44,6 +44,7 @@ restored_plants <- c(
 )
 
 restored_colour <- "#E7298A"
+
 other_plant_colour <- "black"
 
 time_period_order <- c(
@@ -53,7 +54,7 @@ time_period_order <- c(
 )
 
 
-#Prepare network data
+#Clean network text
 
 clean_network_text <- function(x) {
   
@@ -76,8 +77,11 @@ clean_network_text <- function(x) {
 }
 
 
+#Prepare network data
+
 network_figure_data <- pollinators %>%
   mutate(
+    
     Species = clean_network_text(Species),
     Genus = clean_network_text(Genus),
     Family = clean_network_text(Family),
@@ -103,6 +107,7 @@ network_figure_data <- pollinators %>%
     ),
     
     Family.Network = case_when(
+      
       !is.na(Family) &
         Family != "" ~
         Family,
@@ -118,7 +123,10 @@ network_figure_data <- pollinators %>%
         "Unidentified"
     ),
     
+    #Internal name remains Pollinator but represents flower visitors
+    
     Pollinator = case_when(
+      
       !is.na(Species) &
         Species != "" ~
         Species,
@@ -149,6 +157,7 @@ network_figure_data <- pollinators %>%
     ),
     
     Visit.Rate = case_when(
+      
       !is.na(Visits) &
         !is.na(Number.of.Flowers) &
         Number.of.Flowers > 0 ~
@@ -159,6 +168,8 @@ network_figure_data <- pollinators %>%
     )
   )
 
+
+#Interaction data
 
 network_interactions <- network_figure_data %>%
   filter(
@@ -176,6 +187,8 @@ network_interactions <- network_figure_data %>%
     Time.Period != ""
   )
 
+
+#Floral data
 
 network_flowers <- network_figure_data %>%
   filter(
@@ -200,7 +213,7 @@ network_flowers <- network_figure_data %>%
   )
 
 
-#Pollinator colours
+#Flower visitor colours
 
 pollinator_families <- sort(
   unique(
@@ -321,7 +334,7 @@ make_bar_positions <- function(
     labels,
     weights,
     left = 0.04,
-    right = 0.91,
+    right = 0.88,
     gap = 0.012
 ) {
   
@@ -456,15 +469,16 @@ draw_network_panel <- function(
       )
   }
   
+  
   plot(
     NA,
     xlim = c(
-      -0.08,
+      -0.10,
       1.30
     ),
     ylim = c(
-      -0.28,
-      1.30
+      -0.30,
+      1.34
     ),
     type = "n",
     axes = FALSE,
@@ -474,9 +488,10 @@ draw_network_panel <- function(
     yaxs = "i"
   )
   
+  
   text(
-    x = -0.04,
-    y = 1.20,
+    x = -0.05,
+    y = 1.23,
     labels = paste0(
       panel_letter,
       ") ",
@@ -486,9 +501,12 @@ draw_network_panel <- function(
       0,
       0.5
     ),
-    cex = 1.15,
+    cex = 1.25,
     font = 2
   )
+  
+  
+  #Floral abundance
   
   floral_summary <- panel_flowers %>%
     group_by(
@@ -508,6 +526,7 @@ draw_network_panel <- function(
       Floral.Abundance > 0
     )
   
+  
   plants_with_visits <- unique(
     panel_interactions$Plant.Species
   )
@@ -521,6 +540,7 @@ draw_network_panel <- function(
     plant_order %in%
       plants_present
   ]
+  
   
   plant_summary <- tibble(
     Plant.Species =
@@ -537,6 +557,7 @@ draw_network_panel <- function(
       )
     )
   
+  
   plant_positions <- make_bar_positions(
     labels =
       plant_summary$Plant.Species,
@@ -548,7 +569,7 @@ draw_network_panel <- function(
       0.04,
     
     right =
-      0.91,
+      0.88,
     
     gap =
       0.015
@@ -557,6 +578,9 @@ draw_network_panel <- function(
       Plant.Species =
         Label
     )
+  
+  
+  #Flower visitor totals
   
   pollinator_summary <- panel_interactions %>%
     group_by(
@@ -581,6 +605,7 @@ draw_network_panel <- function(
       Pollinator
     )
   
+  
   pollinator_positions <- make_bar_positions(
     labels =
       pollinator_summary$Pollinator,
@@ -592,7 +617,7 @@ draw_network_panel <- function(
       0.04,
     
     right =
-      0.91,
+      0.88,
     
     gap =
       0.008
@@ -603,12 +628,15 @@ draw_network_panel <- function(
     ) %>%
     left_join(
       pollinator_summary %>%
-        select(
+        dplyr::select(
           Pollinator,
           Family.Network
         ),
       by = "Pollinator"
     )
+  
+  
+  #Interaction links
   
   links <- panel_interactions %>%
     group_by(
@@ -625,7 +653,7 @@ draw_network_panel <- function(
     ) %>%
     left_join(
       plant_positions %>%
-        select(
+        dplyr::select(
           Plant.Species,
           Plant.X =
             Centre
@@ -634,7 +662,7 @@ draw_network_panel <- function(
     ) %>%
     left_join(
       pollinator_positions %>%
-        select(
+        dplyr::select(
           Pollinator,
           Pollinator.X =
             Centre
@@ -649,6 +677,9 @@ draw_network_panel <- function(
         Pollinator.X
       )
     )
+  
+  
+  #Draw links
   
   if (
     nrow(
@@ -695,6 +726,7 @@ draw_network_panel <- function(
             )
         )
     }
+    
     
     for (
       i in seq_len(
@@ -745,6 +777,9 @@ draw_network_panel <- function(
     }
   }
   
+  
+  #Plant bars and labels
+  
   if (
     nrow(
       plant_positions
@@ -785,7 +820,7 @@ draw_network_panel <- function(
         plant_positions$Centre,
       
       y =
-        0.12,
+        0.115,
       
       labels =
         abbreviate_plant(
@@ -801,12 +836,18 @@ draw_network_panel <- function(
       ),
       
       cex =
-        0.72,
+        0.95,
       
       font =
-        3
+        3,
+      
+      xpd =
+        NA
     )
   }
+  
+  
+  #Flower visitor bars and labels
   
   if (
     nrow(
@@ -824,6 +865,7 @@ draw_network_panel <- function(
         pollinator_colours
       )
     ] <- "grey50"
+    
     
     rect(
       xleft =
@@ -845,6 +887,7 @@ draw_network_panel <- function(
         pollinator_colours
     )
     
+    
     if (
       show_pollinator_labels
     ) {
@@ -854,7 +897,7 @@ draw_network_panel <- function(
           pollinator_positions$Centre,
         
         y =
-          0.93,
+          0.935,
         
         labels =
           abbreviate_pollinator(
@@ -870,45 +913,39 @@ draw_network_panel <- function(
         ),
         
         cex =
-          0.63,
+          0.90,
         
         col =
-          pollinator_colours
+          pollinator_colours,
+        
+        xpd =
+          NA
       )
     }
   }
   
-  panel_total_visits <- sum(
+  
+  #Total link frequency and total link richness
+  
+  total_link_frequency <- sum(
     panel_interactions$Visits,
     na.rm = TRUE
   )
   
-  panel_plant_richness <- length(
-    plants_present
-  )
-  
-  panel_pollinator_richness <- n_distinct(
-    panel_interactions$Pollinator,
-    na.rm = TRUE
-  )
-  
-  panel_links <- nrow(
+  total_link_richness <- nrow(
     links
   )
   
+  
   text(
-    x = 0.98,
-    y = 0.68,
+    x = 0.93,
+    y = 0.66,
     
     labels = paste0(
-      "Visits: ",
-      panel_total_visits,
-      "\nPlants: ",
-      panel_plant_richness,
-      "\nPollinators: ",
-      panel_pollinator_richness,
-      "\nLinks: ",
-      panel_links
+      "Total link frequency: ",
+      total_link_frequency,
+      "\nTotal link richness: ",
+      total_link_richness
     ),
     
     adj = c(
@@ -917,8 +954,14 @@ draw_network_panel <- function(
     ),
     
     cex =
-      0.72
+      0.82,
+    
+    font =
+      2
   )
+  
+  
+  #No flower visitors
   
   if (
     nrow(
@@ -930,10 +973,11 @@ draw_network_panel <- function(
       x = 0.47,
       y = 0.52,
       labels =
-        "No pollinator visits recorded",
-      cex = 0.85
+        "No flower visitors recorded",
+      cex = 0.95
     )
   }
+  
   
   invisible(
     NULL
@@ -964,6 +1008,7 @@ draw_network_legend <- function(
       Family.Network
     )
   
+  
   plot(
     NA,
     xlim = c(
@@ -980,14 +1025,16 @@ draw_network_legend <- function(
     ylab = ""
   )
   
+  
   text(
     x = 0.5,
     y = 0.88,
     labels =
-      "Pollinator family",
+      "Flower-visitor family",
     font = 2,
-    cex = 1
+    cex = 1.15
   )
+  
   
   if (
     length(
@@ -1009,6 +1056,7 @@ draw_network_legend <- function(
         columns
     )
     
+    
     x_positions <- rep(
       seq(
         0.05,
@@ -1024,6 +1072,7 @@ draw_network_legend <- function(
       )
     ]
     
+    
     y_positions <- rep(
       seq(
         0.66,
@@ -1038,6 +1087,7 @@ draw_network_legend <- function(
         site_families
       )
     ]
+    
     
     rect(
       xleft =
@@ -1063,6 +1113,7 @@ draw_network_legend <- function(
         ]
     )
     
+    
     text(
       x =
         x_positions + 0.035,
@@ -1079,9 +1130,12 @@ draw_network_legend <- function(
       ),
       
       cex =
-        0.76
+        0.90
     )
   }
+  
+  
+  #Plant category
   
   text(
     x = 0.5,
@@ -1089,12 +1143,13 @@ draw_network_legend <- function(
     labels =
       "Plant category",
     font = 2,
-    cex = 1
+    cex = 1.15
   )
+  
   
   rect(
     xleft = c(
-      0.28,
+      0.25,
       0.60
     ),
     
@@ -1102,7 +1157,7 @@ draw_network_legend <- function(
       0.10,
     
     xright = c(
-      0.305,
+      0.275,
       0.625
     ),
     
@@ -1120,9 +1175,10 @@ draw_network_legend <- function(
     )
   )
   
+  
   text(
     x = c(
-      0.315,
+      0.285,
       0.635
     ),
     
@@ -1130,7 +1186,7 @@ draw_network_legend <- function(
       0.135,
     
     labels = c(
-      "Co-flowering plants",
+      "Non-restored plants",
       "Restored plants"
     ),
     
@@ -1140,7 +1196,7 @@ draw_network_legend <- function(
     ),
     
     cex =
-      0.80
+      0.95
   )
 }
 
@@ -1155,6 +1211,7 @@ plot_site_network <- function(
     site
   )
   
+  
   layout(
     matrix(
       1:5,
@@ -1162,13 +1219,14 @@ plot_site_network <- function(
       ncol = 1
     ),
     heights = c(
-      1.30,
-      1,
-      1,
-      1,
-      0.55
+      1.45,
+      1.10,
+      1.10,
+      1.10,
+      0.65
     )
   )
+  
   
   par(
     oma = c(
@@ -1179,14 +1237,18 @@ plot_site_network <- function(
     )
   )
   
+  
   par(
     mar = c(
+      0.6,
       0.4,
-      0.4,
-      0.4,
+      0.8,
       0.4
     )
   )
+  
+  
+  #Overall
   
   draw_network_panel(
     site =
@@ -1202,6 +1264,9 @@ plot_site_network <- function(
       TRUE
   )
   
+  
+  #Time period 1
+  
   draw_network_panel(
     site =
       site,
@@ -1215,6 +1280,9 @@ plot_site_network <- function(
     panel_title =
       "Time period 1"
   )
+  
+  
+  #Time period 2
   
   draw_network_panel(
     site =
@@ -1230,6 +1298,9 @@ plot_site_network <- function(
       "Time period 2"
   )
   
+  
+  #Time period 3
+  
   draw_network_panel(
     site =
       site,
@@ -1244,9 +1315,15 @@ plot_site_network <- function(
       "Time period 3"
   )
   
+  
+  #Legend
+  
   draw_network_legend(
     site
   )
+  
+  
+  #Site title
   
   mtext(
     paste(
@@ -1256,9 +1333,10 @@ plot_site_network <- function(
     side = 3,
     outer = TRUE,
     line = 0.5,
-    cex = 1.7,
+    cex = 1.9,
     font = 2
   )
+  
   
   invisible(
     NULL
@@ -1284,9 +1362,9 @@ plot_site_network(
 #Save Site 1 and Site 2 on separate pages
 
 pdf(
-  "Plant_pollinator_networks_by_site.pdf",
-  width = 13,
-  height = 16,
+  "Plant_flower_visitor_networks_by_site.pdf",
+  width = 15,
+  height = 17,
   family = "sans",
   onefile = TRUE
 )
@@ -1299,8 +1377,8 @@ plot_site_network(
   "2"
 )
 
-dev.list()
-graphics.off()
+dev.off()
+
 
 #Preview Site 1
 

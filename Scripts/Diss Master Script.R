@@ -1,9 +1,12 @@
 #Master Script
 
+# Note: objects labelled "pollinator" refer to observed flower visitors.
+# Pollination effectiveness was not directly measured.
+
 #Import Data
 
 pollinators <- read.csv(
-  "Pollinators.csv",
+  "Raw Data/Pollinators.csv",
   header = TRUE,
   stringsAsFactors = FALSE
 )
@@ -234,6 +237,8 @@ table(
   survey_data$Plant.ID,
   survey_data$Site
 )
+
+
 ###############################################################
 # Questions 1 and 2
 # 1. Does pollinator visitation vary throughout the day?
@@ -382,6 +387,32 @@ Uniformity_TimeSite_nbinom1
 Dispersion_TimeSite_nbinom1
 ZeroInflation_TimeSite_nbinom1
 
+# Three-panel diagnostic figure
+par(
+  mfrow = c(3, 1),
+  mar = c(4, 4, 2, 1)
+)
+
+# Panel 1
+plotQQunif(
+  simulationOutput_TimeSite_nbinom1
+)
+
+# Panel 2
+testDispersion(
+  simulationOutput_TimeSite_nbinom1,
+  plot = TRUE
+)
+
+# Panel 3
+testZeroInflation(
+  simulationOutput_TimeSite_nbinom1,
+  plot = TRUE
+)
+
+# Reset plotting layout afterwards
+par(mfrow = c(1, 1))
+
 
 #nbinom1 was chosen as it converges cleanly;
 #pdHess is TRUE; diagnostics are satisfactory; AIC is meaningfully lower.
@@ -390,6 +421,7 @@ ZeroInflation_TimeSite_nbinom1
 
 ModelTimeSite_final <- ModelTimeSite_nbinom1
 
+summary(ModelTimeSite_nbinom1)
 
 #Test the overall fixed effects
 
@@ -431,7 +463,137 @@ Time_emmeans$emmeans
 
 Time_emmeans$contrasts
 
+library(emmeans)
 
+Time_emm <- emmeans(
+  ModelTimeSite_final,
+  ~ Time.Period
+)
+
+contrast(
+  Time_emm,
+  method = list(
+    "Period 2 vs Periods 1 and 3" = c(-0.5, 1, -0.5)
+  ),
+  adjust = "none"
+)
+
+
+# Estimated marginal means for time period
+Time_emm <- emmeans(
+  ModelTimeSite_final,
+  ~ Time.Period,
+  type = "response"
+)
+
+# Convert to data frame
+Time_plot_data <- as.data.frame(Time_emm)
+
+Time_plot_data$Time.Period <- factor(
+  Time_plot_data$Time.Period,
+  levels = c("1", "2", "3"),
+  labels = c(
+    "Time period 1",
+    "Time period 2",
+    "Time period 3"
+  )
+)
+
+# Plot
+Time_plot <- ggplot(
+  Time_plot_data,
+  aes(
+    x = Time.Period,
+    y = response,
+    colour = Time.Period
+  )
+) +
+  
+  geom_errorbar(
+    aes(
+      ymin = asymp.LCL,
+      ymax = asymp.UCL
+    ),
+    width = 0.15,
+    linewidth = 1
+  ) +
+  
+  geom_point(
+    size = 4.5
+  ) +
+  
+  scale_colour_manual(
+    values = c(
+      "Time period 1" = "#CC0033",
+      "Time period 2" = "#FF9900",
+      "Time period 3" = "#FFCC00"
+    )
+  ) +
+  
+  labs(
+    x = "Time period",
+    y = "Estimated floral visitor visits per 20-minute survey"
+  )
+  theme_classic(
+    base_size = 14
+  ) +
+  
+  theme(
+    legend.position = "none",
+    axis.title = element_text(
+      face = "bold"
+    ),
+    axis.text = element_text(
+      colour = "black"
+    ),
+    panel.border = element_rect(
+      fill = NA,
+      colour = "black",
+      linewidth = 0.7
+    )
+  )
+
+Time_plot
+
+#Four-panel diagnostic figure
+
+#Make text slightly smaller so labels are not cut off
+par(
+  mfrow = c(2, 2),
+  mar = c(6, 5, 3, 2),
+  oma = c(1, 1, 1, 1),
+  cex = 0.75
+)
+
+#Panel 1: QQ residual diagnostic
+plotQQunif(
+  simulationOutput_TimeSite_nbinom1
+)
+
+#Panel 2: Residuals against fitted values
+plotResiduals(
+  simulationOutput_TimeSite_nbinom1,
+  form = fitted(ModelTimeSite_final)
+)
+
+#Panel 3: Dispersion diagnostic
+testDispersion(
+  simulationOutput_TimeSite_nbinom1,
+  plot = TRUE
+)
+
+#Panel 4: Zero-inflation diagnostic
+testZeroInflation(
+  simulationOutput_TimeSite_nbinom1,
+  plot = TRUE
+)
+
+#Reset plotting layout afterwards
+par(
+  mfrow = c(1, 1),
+  mar = c(5.1, 4.1, 4.1, 2.1),
+  cex = 1
+)
 #################################################
 #Question 2: Estimated visitation by site
 #################################################
@@ -1312,7 +1474,7 @@ site1_nestedness_plot <- ggplot(
         2
       )
     ),
-    x = "Pollinator taxon",
+    x = "Flower visitor taxon",
     y = "Plant species"
   ) +
   
@@ -1382,7 +1544,7 @@ site2_nestedness_plot <- ggplot(
         2
       )
     ),
-    x = "Pollinator taxon",
+    x = "Flower visitor taxon",
     y = "Plant species"
   ) +
   
@@ -1510,7 +1672,7 @@ calculate_two_tailed_p <- function(
   )
 }
 
-# Weighted NODF null-model standardisation
+# Weighted NODF null-model standardistion
 
 standardise_weighted_nodf <- function(
     web,
@@ -1817,13 +1979,14 @@ site1_modularity_results <- standardise_modularity(
   seed = 123
 )
 
-
+site1_modularity_results
 site1_connectance_results <- standardise_connectance(
   site1_species_web,
   null_reps = 500,
   seed = 123
 )
 
+site1_modularity_results$summary
 #Site 2
 
 site2_nodf_results <- standardise_weighted_nodf(
@@ -1839,7 +2002,6 @@ site2_modularity_results <- standardise_modularity(
   module_reps = 500,
   seed = 456
 )
-
 
 site2_connectance_results <- standardise_connectance(
   site2_species_web,
@@ -1880,6 +2042,54 @@ network_null_results <- bind_rows(
 
 
 network_null_results
+
+set.seed(123)
+
+c(
+  Site1_50 = calculate_modularity_meta(
+    site1_species_web,
+    module_reps = 50
+  ),
+  
+  Site1_100 = calculate_modularity_meta(
+    site1_species_web,
+    module_reps = 100
+  ),
+  
+  Site1_250 = calculate_modularity_meta(
+    site1_species_web,
+    module_reps = 250
+  ),
+  
+  Site1_500 = calculate_modularity_meta(
+    site1_species_web,
+    module_reps = 500
+  )
+)
+
+set.seed(456)
+
+c(
+  Site2_50 = calculate_modularity_meta(
+    site2_species_web,
+    module_reps = 50
+  ),
+  
+  Site2_100 = calculate_modularity_meta(
+    site2_species_web,
+    module_reps = 100
+  ),
+  
+  Site2_250 = calculate_modularity_meta(
+    site2_species_web,
+    module_reps = 250
+  ),
+  
+  Site2_500 = calculate_modularity_meta(
+    site2_species_web,
+    module_reps = 500
+  )
+)
 
 #Rounded reporting table
 
@@ -1998,6 +2208,15 @@ hist(
 abline(
   v = site2_modularity_results$summary$Observed,
   lwd = 2
+)
+
+time_period_webs <- list(
+  "Site 1 - Time Period 1" = site1_tp1_species_web,
+  "Site 1 - Time Period 2" = site1_tp2_species_web,
+  "Site 1 - Time Period 3" = site1_tp3_species_web,
+  "Site 2 - Time Period 1" = site2_tp1_species_web,
+  "Site 2 - Time Period 2" = site2_tp2_species_web,
+  "Site 2 - Time Period 3" = site2_tp3_species_web
 )
 
 #####################################
@@ -3317,6 +3536,21 @@ plot_site_network(
   "2"
 )
 
+dim(site1_period1_species_web)
+dim(site1_period2_species_web)
+dim(site1_period3_species_web)
+
+dim(site2_period1_species_web)
+dim(site2_period2_species_web)
+dim(site2_period3_species_web)
+
+sum(site1_period1_species_web)
+sum(site1_period2_species_web)
+sum(site1_period3_species_web)
+
+sum(site2_period1_species_web)
+sum(site2_period2_species_web)
+sum(site2_period3_species_web)
 
 ################################################################################
 #5. Does the effect of temperature on pollinator visitation vary among
@@ -3794,8 +4028,7 @@ Temperature_plot <- ggplot(
   
   labs(
     x = "Temperature (°C)",
-    y = "Predicted number of visits per survey",
-    title = "Temperature responses of pollinator groups"
+    y = "Predicted number of visits per survey"
   ) +
   
   theme_classic(
@@ -3818,6 +4051,678 @@ Temperature_plot <- ggplot(
 
 Temperature_plot
 
+#Diagnostocs for nbinom1
+
+TempGroup_residuals_nbinom1 <- simulateResiduals(
+  fittedModel = ModelTempGroup_final_nbinom1,
+  n = 1000
+)
+
+#Four-panel figure
+par(
+  mfrow = c(2, 2),
+  mar = c(6, 5, 3, 2),
+  cex = 0.75
+)
+
+#QQ plot
+plotQQunif(
+  TempGroup_residuals_nbinom1
+)
+
+#Residuals against fitted values
+plotResiduals(
+  TempGroup_residuals_nbinom1,
+  form = fitted(ModelTempGroup_final_nbinom1)
+)
+
+#Dispersion
+testDispersion(
+  TempGroup_residuals_nbinom1,
+  plot = TRUE
+)
+
+#Zero inflation
+testZeroInflation(
+  TempGroup_residuals_nbinom1,
+  plot = TRUE
+)
+
+#Reset
+par(mfrow = c(1, 1))
+
+#Zero-inflated negative-binomial model
+
+ModelTempGroup_ZINB <- glmmTMB(
+  Visits ~
+    Temperature_c +
+    I(Temperature_c^2) +
+    Group +
+    Temperature_c:Group +
+    Site +
+    Time.Period +
+    Plant.ID +
+    (1 | Date),
+  ziformula = ~1,
+  family = nbinom2,
+  data = analysis_data_quad
+)
+
+#Check convergence
+ModelTempGroup_ZINB$sdr$pdHess
+
+#Compare AIC
+AIC(
+  ModelTempGroup_final,
+  ModelTempGroup_ZINB
+)
+
+#Diagnostics
+TempGroup_ZINB_residuals <- simulateResiduals(
+  ModelTempGroup_ZINB,
+  n = 1000
+)
+
+plot(TempGroup_ZINB_residuals)
+
+testUniformity(TempGroup_ZINB_residuals)
+testDispersion(TempGroup_ZINB_residuals)
+testZeroInflation(TempGroup_ZINB_residuals)
+
+#Bad diagnostics
+
+#How many rows represent each survey × pollinator group?
+
+analysis_data_quad %>%
+  count(
+    Date,
+    Site,
+    Plant.ID,
+    Time.Period,
+    Block,
+    Replication,
+    Group
+  ) %>%
+  count(n)
+
+#Number of rows currently used
+nrow(analysis_data_quad)
+
+#Number of unique 20-minute surveys
+analysis_data_quad %>%
+  distinct(
+    Date,
+    Site,
+    Plant.ID,
+    Time.Period,
+    Block,
+    Replication
+  ) %>%
+  nrow()
+
+#Prepare survey x pollinator group dataset
+
+#This analysis requires one row for each survey x pollinator group.
+#Multiple records from the same pollinator group within the same
+#20-minute survey are therefore summed together.
+
+#Pollinator groups included in the final quadratic temperature analysis
+
+groups_quad <- c(
+  "Bumblebee",
+  "Butterfly",
+  "Honeybee",
+  "Hoverfly",
+  "Non-syrphid Fly"
+)
+
+
+#Create one row for each survey and retain the temperature
+#recorded during that survey
+
+survey_conditions <- analysis_data_temp %>%
+  filter(
+    Group %in% groups_quad
+  ) %>%
+  group_by(
+    Date,
+    Site,
+    Plant.ID,
+    Time.Period,
+    Block,
+    Replication
+  ) %>%
+  summarise(
+    Temperature..C.degrees. =
+      first(Temperature..C.degrees.),
+    .groups = "drop"
+  )
+
+
+#Sum all visits from the same pollinator group within
+#each 20-minute survey
+
+survey_group_visits <- analysis_data_temp %>%
+  filter(
+    Group %in% groups_quad
+  ) %>%
+  group_by(
+    Date,
+    Site,
+    Plant.ID,
+    Time.Period,
+    Block,
+    Replication,
+    Group
+  ) %>%
+  summarise(
+    Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+
+#Create every survey x pollinator group combination
+
+#This adds explicit zeroes where a pollinator group was
+#not recorded during a particular survey.
+
+analysis_data_quad2 <- survey_conditions %>%
+  tidyr::crossing(
+    Group = groups_quad
+  ) %>%
+  left_join(
+    survey_group_visits,
+    by = c(
+      "Date",
+      "Site",
+      "Plant.ID",
+      "Time.Period",
+      "Block",
+      "Replication",
+      "Group"
+    )
+  ) %>%
+  mutate(
+    Visits = replace_na(
+      Visits,
+      0
+    ),
+    
+    Group = factor(
+      Group,
+      levels = groups_quad
+    ),
+    
+    Date = factor(Date),
+    Site = factor(Site),
+    Plant.ID = factor(Plant.ID),
+    Time.Period = factor(Time.Period)
+  )
+
+
+#Check final analysis structure
+
+nrow(analysis_data_quad2)
+
+table(
+  analysis_data_quad2$Group
+)
+
+table(
+  analysis_data_quad2$Visits == 0
+)
+
+
+#Check that there is now only one row for each
+#survey x pollinator group combination
+
+analysis_data_quad2 %>%
+  count(
+    Date,
+    Site,
+    Plant.ID,
+    Time.Period,
+    Block,
+    Replication,
+    Group
+  ) %>%
+  count(
+    n,
+    name = "number_of_combinations"
+  )
+
+#Mean-centre temperature
+
+mean_temperature_quad2 <- mean(
+  analysis_data_quad2$Temperature..C.degrees.,
+  na.rm = TRUE
+)
+
+analysis_data_quad2 <- analysis_data_quad2 %>%
+  mutate(
+    Temperature_c =
+      Temperature..C.degrees. - mean_temperature_quad2
+  )
+
+
+#Final temperature x pollinator group model
+
+ModelTempGroup_final2 <- glmmTMB(
+  Visits ~
+    Temperature_c +
+    I(Temperature_c^2) +
+    Group +
+    Temperature_c:Group +
+    Site +
+    Time.Period +
+    Plant.ID +
+    (1 | Date),
+  family = nbinom2,
+  data = analysis_data_quad2
+)
+
+
+#Check model
+
+summary(ModelTempGroup_final2)
+
+ModelTempGroup_final2$sdr$pdHess
+
+
+#Overall fixed-effect tests
+
+TempGroup_final2_Anova <- car::Anova(
+  ModelTempGroup_final2,
+  type = 2
+)
+
+TempGroup_final2_Anova
+
+
+#Model diagnostics
+
+TempGroup_residuals2 <- simulateResiduals(
+  fittedModel = ModelTempGroup_final2,
+  n = 1000
+)
+
+plot(TempGroup_residuals2)
+
+testUniformity(
+  TempGroup_residuals2
+)
+
+testDispersion(
+  TempGroup_residuals2
+)
+
+testZeroInflation(
+  TempGroup_residuals2
+)
+
+summary(ModelTempGroup_final2)
+
+TempGroup_final2_Anova
+
+ModelTempGroup_final2$sdr$pdHess
+
+AIC(ModelTempGroup_final2)
+
+table(
+  analysis_data_quad2$Plant.ID,
+  analysis_data_quad2$Site
+)
+
+ModelTempGroup_final3 <- glmmTMB(
+  Visits ~
+    Temperature_c +
+    I(Temperature_c^2) +
+    Group +
+    Temperature_c:Group +
+    Time.Period +
+    Plant.ID +
+    (1 | Date),
+  family = nbinom2,
+  data = analysis_data_quad2
+)
+
+summary(ModelTempGroup_final3)
+
+# Same model without Date random effect
+
+ModelTempGroup_no_date2 <- glmmTMB(
+  Visits ~
+    Temperature_c +
+    I(Temperature_c^2) +
+    Group +
+    Temperature_c:Group +
+    Time.Period +
+    Plant.ID,
+  family = nbinom2,
+  data = analysis_data_quad2
+)
+
+AIC(
+  ModelTempGroup_final3,
+  ModelTempGroup_no_date2
+)
+
+ModelTempGroup_no_date2$sdr$pdHess
+
+#Final temperature x pollinator group model
+
+#Date was initially included as a random effect.
+#Its estimated variance was effectively zero and removing
+#Date reduced AIC from 1140.41 to 1138.41.
+#The simpler model without Date was therefore retained.
+#Final temperature x pollinator group model
+
+#Site is excluded because Plant ID is nested within site.
+#Date was initially included as a random effect, but its
+#estimated variance was effectively zero and its removal
+#reduced AIC from 1140.41 to 1138.41.
+
+ModelTempGroup_final <- glmmTMB(
+  Visits ~
+    Temperature_c +
+    I(Temperature_c^2) +
+    Group +
+    Temperature_c:Group +
+    Time.Period +
+    Plant.ID,
+  family = nbinom2,
+  data = analysis_data_quad2
+)
+
+
+#Check that the correct model has been fitted
+
+formula(ModelTempGroup_final)
+
+ModelTempGroup_final$sdr$pdHess
+
+AIC(ModelTempGroup_final)
+
+
+#Overall fixed-effect tests
+
+TempGroup_final_Anova <- car::Anova(
+  ModelTempGroup_final,
+  type = 2
+)
+
+TempGroup_final_Anova
+
+set.seed(123)
+
+TempGroup_residuals <- simulateResiduals(
+  fittedModel = ModelTempGroup_final,
+  n = 1000
+)
+
+#Four-panel diagnostic figure
+
+par(
+  mfrow = c(2, 2),
+  mar = c(5, 5, 3, 2),
+  cex = 0.8
+)
+
+
+#Panel 1: QQ residual diagnostic
+
+plotQQunif(
+  TempGroup_residuals
+)
+
+
+#Panel 2: Residuals against fitted values
+
+plotResiduals(
+  TempGroup_residuals,
+  form = fitted(ModelTempGroup_final)
+)
+
+
+#Panel 3: Dispersion diagnostic
+
+testDispersion(
+  TempGroup_residuals,
+  plot = TRUE
+)
+
+
+#Panel 4: Zero-inflation diagnostic
+
+testZeroInflation(
+  TempGroup_residuals,
+  plot = TRUE
+)
+
+
+#Reset plotting layout afterwards
+
+par(
+  mfrow = c(1, 1)
+)
+
+#Group-specific temperature slopes from the FINAL model
+
+library(emmeans)
+
+temp_gradients_final <- emtrends(
+  ModelTempGroup_final,
+  ~ Group,
+  var = "Temperature_c"
+)
+
+summary(
+  temp_gradients_final,
+  infer = c(TRUE, TRUE)
+)
+
+#Generate predictions from the FINAL temperature x pollinator group model
+
+#Calculate the observed temperature range for each pollinator group
+
+group_temperature_ranges_final <- analysis_data_quad2 %>%
+  group_by(Group) %>%
+  summarise(
+    min_temperature = min(
+      Temperature..C.degrees.,
+      na.rm = TRUE
+    ),
+    max_temperature = max(
+      Temperature..C.degrees.,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+
+#Create a sequence of temperatures within the observed
+#temperature range of each pollinator group
+
+Temp_predictions_final_df <- group_temperature_ranges_final %>%
+  group_by(Group) %>%
+  reframe(
+    Temperature = seq(
+      min_temperature,
+      max_temperature,
+      length.out = 100
+    )
+  ) %>%
+  ungroup() %>%
+  mutate(
+    Temperature_c =
+      Temperature - mean_temperature_quad2,
+    
+    Group = factor(
+      Group,
+      levels = levels(analysis_data_quad2$Group)
+    ),
+    
+    Time.Period = factor(
+      levels(analysis_data_quad2$Time.Period)[1],
+      levels = levels(analysis_data_quad2$Time.Period)
+    ),
+    
+    Plant.ID = factor(
+      levels(analysis_data_quad2$Plant.ID)[1],
+      levels = levels(analysis_data_quad2$Plant.ID)
+    )
+  )
+
+
+#Generate predicted visitation and 95% confidence intervals
+
+prediction_results_final <- predict(
+  ModelTempGroup_final,
+  newdata = Temp_predictions_final_df,
+  type = "link",
+  se.fit = TRUE
+)
+
+
+Temp_predictions_final_df <- Temp_predictions_final_df %>%
+  mutate(
+    predicted_visits = exp(
+      prediction_results_final$fit
+    ),
+    
+    lower_CL = exp(
+      prediction_results_final$fit -
+        1.96 * prediction_results_final$se.fit
+    ),
+    
+    upper_CL = exp(
+      prediction_results_final$fit +
+        1.96 * prediction_results_final$se.fit
+    )
+  )
+
+
+#Check predictions
+
+head(Temp_predictions_final_df)
+
+
+#Plot temperature responses
+
+pollinator_colours <- c(
+  "Bumblebee" = "firebrick2",
+  "Butterfly" = "lightskyblue",
+  "Honeybee" = "gold1",
+  "Hoverfly" = "darkorange",
+  "Non-syrphid Fly" = "mediumpurple"
+)
+
+
+Temperature_plot_final <- ggplot(
+  Temp_predictions_final_df,
+  aes(
+    x = Temperature,
+    y = predicted_visits,
+    colour = Group,
+    fill = Group
+  )
+) +
+  
+  #Observed survey x pollinator group counts
+  
+  geom_point(
+    data = analysis_data_quad2,
+    aes(
+      x = Temperature..C.degrees.,
+      y = Visits,
+      colour = Group
+    ),
+    alpha = 0.3,
+    size = 1.5,
+    inherit.aes = FALSE,
+    position = position_jitter(
+      width = 0.2,
+      height = 0
+    )
+  ) +
+  
+  #95% confidence intervals
+  
+  geom_ribbon(
+    aes(
+      ymin = lower_CL,
+      ymax = upper_CL
+    ),
+    alpha = 0.15,
+    colour = NA
+  ) +
+  
+  #Predicted temperature response
+  
+  geom_line(
+    linewidth = 1.3
+  ) +
+  
+  facet_wrap(
+    ~ Group,
+    scales = "free_y"
+  ) +
+  
+  scale_colour_manual(
+    values = pollinator_colours
+  ) +
+  
+  scale_fill_manual(
+    values = pollinator_colours
+  ) +
+  
+  labs(
+    x = "Temperature (°C)",
+    y = "Predicted number of visits per 20-minute survey"
+  ) +
+  
+  theme_classic(
+    base_size = 13
+  ) +
+  
+  theme(
+    strip.text = element_text(
+      face = "bold"
+    ),
+    
+    legend.position = "none"
+  )
+
+
+Temperature_plot_final
+
+#Create appendix coefficient table for the final
+#temperature x pollinator group model
+
+M3_results <- as.data.frame(
+  coef(summary(ModelTempGroup_final))$cond
+)
+
+M3_results$Term <- rownames(M3_results)
+
+M3_table <- M3_results %>%
+  dplyr::mutate(
+    Lower.CI = Estimate - 1.96 * `Std. Error`,
+    Upper.CI = Estimate + 1.96 * `Std. Error`
+  ) %>%
+  dplyr::select(
+    Term,
+    Estimate,
+    `Std. Error`,
+    Lower.CI,
+    Upper.CI,
+    `Pr(>|z|)`
+  )
+
+M3_table
 #######################################################################################
 #6. Does visitation differ among plant species after accounting for floral abundance?
 #######################################################################################
@@ -3832,7 +4737,7 @@ survey_model <- survey_model |>
     Plant.Species = case_when(
       Plant.ID %in% c("1", "7")  ~ "Hypochaeris radicata",
       Plant.ID == "2"            ~ "Dianthus deltoides",
-      Plant.ID %in% c("3", "8")  ~ "Thymus polytrichus",
+      Plant.ID %in% c("3", "8") ~ "Thymus drucei",
       Plant.ID %in% c("4", "9")  ~ "Lotus corniculatus",
       Plant.ID %in% c("5", "10") ~ "Silene viscaria",
       Plant.ID == "6"            ~ "Galium saxatile",
@@ -3845,7 +4750,7 @@ survey_model <- survey_model |>
     Plant.Common.Name = case_when(
       Plant.Species == "Hypochaeris radicata"  ~ "Yellow flatweed",
       Plant.Species == "Dianthus deltoides"    ~ "Maiden pink",
-      Plant.Species == "Thymus polytrichus"    ~ "Wild thyme",
+      Plant.Species == "Thymus drucei"    ~ "Wild thyme",
       Plant.Species == "Lotus corniculatus"    ~ "Bird's-foot trefoil",
       Plant.Species == "Silene viscaria"       ~ "Sticky catchfly",
       Plant.Species == "Galium saxatile"       ~ "Heath bedstraw",
@@ -3856,6 +4761,8 @@ survey_model <- survey_model |>
     )
   )
 
+
+#Prepare analysis data
 
 #Prepare analysis data
 
@@ -3871,26 +4778,18 @@ analysis_data_plant <- survey_model |>
   )
 
 
-# Check that all plant species are represented
-table(
-  analysis_data_plant$Plant.Species,
-  useNA = "ifany"
-)
+#Check that thyme is now labelled correctly
 
-# Check total visits for each species
-analysis_data_plant |>
-  group_by(Plant.Species) |>
-  summarise(
-    Surveys = n(),
-    Total.Visits = sum(Visits),
-    .groups = "drop"
-  )
+levels(analysis_data_plant$Plant.Species)
+
+table(
+  analysis_data_plant$Plant.Species
+)
 
 
 #Fit species model
 
-# The offset accounts for the number of flowers available
-ModelSpecies_nb <- glm.nb(
+ModelSpecies_nb <- MASS::glm.nb(
   Visits ~
     Plant.Species +
     Site +
@@ -3900,112 +4799,15 @@ ModelSpecies_nb <- glm.nb(
 )
 
 
-#Fit null model without plant species
+#Recalculate estimated marginal means
 
-ModelAbundance_nb <- glm.nb(
-  Visits ~
-    Site +
-    Time.Period +
-    offset(log(Number.of.Flowers)),
-  data = analysis_data_plant
-)
-
-
-#Compare both models
-
-# Does including plant species significantly improve model fit?
-anova(
-  ModelAbundance_nb,
-  ModelSpecies_nb,
-  test = "Chisq"
-)
-
-# Compare model support
-AIC(
-  ModelAbundance_nb,
-  ModelSpecies_nb
-)
-
-
-#######################################################################
-#7. Which plant species are most attractive to pollinators?
-#######################################################################
-
-#Estimated visitation rates
-
-#offset = 0 corresponds to log(1 flower)
-#Therefore, estimates are predicted visits per flower per survey
-Species_emmeans <- emmeans(
+Species_emmeans <- emmeans::emmeans(
   ModelSpecies_nb,
   ~ Plant.Species,
-  type = "response",
-  offset = 0
+  type = "response"
 )
 
 Species_emmeans
-
-#Create results table
-
-Species_table <- as.data.frame(Species_emmeans) |>
-  left_join(
-    survey_model |>
-      distinct(
-        Plant.Species,
-        Plant.Common.Name
-      ),
-    by = "Plant.Species"
-  ) |>
-  select(
-    Plant.Common.Name,
-    Plant.Species,
-    response,
-    SE,
-    asymp.LCL,
-    asymp.UCL
-  ) |>
-  rename(
-    `Common name` = Plant.Common.Name,
-    `Scientific name` = Plant.Species,
-    `Predicted visits per flower per 20-minute survey` = response,
-    `Standard error` = SE,
-    `Lower 95% CI` = asymp.LCL,
-    `Upper 95% CI` = asymp.UCL
-  ) |>
-  arrange(
-    desc(`Predicted visits per flower per 20-minute survey`)
-  ) |>
-  mutate(
-    across(
-      where(is.numeric),
-      ~ round(.x, 3)
-    )
-  )
-
-Species_table
-
-Species_plot <- as.data.frame(Species_emmeans) |>
-  left_join(
-    survey_model |>
-      distinct(
-        Plant.Species,
-        Plant.Common.Name
-      ),
-    by = "Plant.Species"
-  ) |>
-  arrange(response) |>
-  mutate(
-    Plant.Label = paste0(
-      Plant.Common.Name,
-      "\n(",
-      Plant.Species,
-      ")"
-    ),
-    Plant.Label = factor(
-      Plant.Label,
-      levels = Plant.Label
-    )
-  )
-
 Species_plot <- as.data.frame(Species_emmeans) |>
   dplyr::left_join(
     survey_model |>
@@ -4021,37 +4823,18 @@ Species_plot <- as.data.frame(Species_emmeans) |>
         "Dianthus deltoides",
         "Silene viscaria"
       ) ~ "Restored",
-      
-      TRUE ~ "Native"
-    )
-  )
-
-# Create plotting data first
-Species_plot <- Species_plot |>
-  mutate(
-    Plant.Label = factor(
-      Plant.Species,
-      levels = Plant.Species[order(response)]
-    )
-  )
-
-Species_plot <- Species_plot |>
-  mutate(
-    Type = case_when(
-      Plant.Species %in% c(
-        "Dianthus deltoides",
-        "Silene viscaria"
-      ) ~ "Restored",
-      TRUE ~ "Native"
+      TRUE ~ "Non-restored"
     ),
+    
     Plant.Label = factor(
       Plant.Species,
-      levels = Plant.Species[order(response)]
+      levels = Plant.Species[
+        order(response)
+      ]
     )
   )
 
-# Plot
-ggplot(
+Species_plot_figure <- ggplot(
   Species_plot,
   aes(
     x = Plant.Label,
@@ -4067,26 +4850,100 @@ ggplot(
     width = 0.15,
     linewidth = 0.8
   ) +
-  geom_point(size = 3.5) +
+  geom_point(
+    size = 3.5
+  ) +
   coord_flip() +
   scale_y_log10() +
   scale_colour_manual(
     values = c(
-      "Native" = "forestgreen",
+      "Non-restored" = "dodgerblue",
       "Restored" = "#FF3399"
     )
   ) +
   labs(
     x = NULL,
-    y = "Adjusted predicted visitation rate",
+    y = "Predicted visits per flower per 20-minute survey",
     colour = NULL
   ) +
-  theme_classic(base_size = 14) +
+  theme_classic(
+    base_size = 14
+  ) +
   theme(
-    axis.text.y = element_text(face = "italic"),
+    axis.text.y = element_text(
+      face = "italic"
+    ),
     legend.position = "top"
   )
 
+Species_plot_figure
+
+#Create M1 results table
+
+M1_results <- as.data.frame(
+  coef(summary(ModelSpecies_nb))
+)
+
+M1_results$Term <- rownames(M1_results)
+
+M1_table <- M1_results |>
+  dplyr::mutate(
+    Lower.CI = Estimate - 1.96 * `Std. Error`,
+    Upper.CI = Estimate + 1.96 * `Std. Error`
+  ) |>
+  dplyr::select(
+    Term,
+    Estimate,
+    `Std. Error`,
+    Lower.CI,
+    Upper.CI,
+    `Pr(>|z|)`
+  )
+
+M1_table
+
+Species_emmeans
+
+#M1 Diagnostics
+#Save four-panel diagnostic figure for Model M1
+
+png(
+  "M1_diagnostics.png",
+  width = 2400,
+  height = 2000,
+  res = 300
+)
+
+par(
+  mfrow = c(2, 2),
+  mar = c(6, 5, 3, 2),
+  cex = 0.75
+)
+
+#Panel 1: QQ residual diagnostic
+plotQQunif(
+  M1_residuals
+)
+
+#Panel 2: Residuals against fitted values
+plotResiduals(
+  M1_residuals,
+  form = fitted(ModelSpecies_nb)
+)
+
+#Panel 3: Dispersion diagnostic
+testDispersion(
+  M1_residuals,
+  plot = TRUE
+)
+
+#Panel 4: Zero-inflation diagnostic
+testZeroInflation(
+  M1_residuals,
+  plot = TRUE
+)
+
+dev.off()
 #######################################################################################################################
 #8. Which environmental variables (temperature, solar radiation, wind speed, humidity)
 #best predict pollinator visitation?
@@ -4094,17 +4951,82 @@ ggplot(
 
 #Fix dates
 
-survey_environment$Date[
-  survey_environment$Date == as.Date("2026-06-06")
-] <- as.Date("2026-06-05")
-
-survey_environment$Date[
-  survey_environment$Date == as.Date("2026-07-03")
-] <- as.Date("2026-07-02")
-
+survey_data <- pollinators %>%
+  mutate(
+    Date = as.Date(
+      Date,
+      format = "%d/%m/%Y"
+    ),
+    
+    Date = case_when(
+      Date == as.Date("2026-06-06") ~ as.Date("2026-06-05"),
+      Date == as.Date("2026-07-03") ~ as.Date("2026-07-02"),
+      TRUE ~ Date
+    ),
+    
+    Time.Period = factor(Time.Period),
+    Site = factor(Site),
+    Plant.ID = factor(Plant.ID),
+    Block = factor(Block),
+    Replication = factor(Replication)
+  ) %>%
+  
+  group_by(
+    Date,
+    Block,
+    Replication,
+    Time.Period,
+    Site,
+    Plant.ID,
+    Start.Time
+  ) %>%
+  
+  summarise(
+    Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    
+    Number.of.Flowers = first(
+      Number.of.Flowers
+    ),
+    
+    Abundance = first(
+      Abundance
+    ),
+    
+    Minutes = first(
+      Minutes
+    ),
+    
+    Temperature..C.degrees. = first(
+      Temperature..C.degrees.
+    ),
+    
+    Solar.Power..W.m.2. = first(
+      Solar.Power..W.m.2.
+    ),
+    
+    Humidity....RH. = first(
+      Humidity....RH.
+    ),
+    
+    Wind.Speed..m.s. = first(
+      Wind.Speed..m.s.
+    ),
+    
+    .groups = "drop"
+  ) %>%
+  
+  mutate(
+    Date = droplevels(factor(Date)),
+    Time.Period = droplevels(factor(Time.Period)),
+    Site = droplevels(factor(Site)),
+    Plant.ID = droplevels(factor(Plant.ID))
+  )
 #Prep data
 
-survey_environment2 <- survey_environment %>%
+survey_environment2 <- survey_data %>%
   filter(
     !(Plant.ID %in% c("6", "13")),
     !is.na(Visits),
@@ -4159,6 +5081,23 @@ table(survey_environment2$Plant.ID)
 summary(
   survey_environment2$Number.of.Flowers
 )
+
+# Null model for environmental predictors
+
+# Null model contains the same controls as the final model,
+# but excludes all environmental predictors
+
+Environment_null <- glmmTMB(
+  Visits ~
+    Plant.ID +
+    offset(log(Number.of.Flowers)) +
+    (1 | Date),
+  family = nbinom2,
+  data = survey_environment2
+)
+
+summary(Environment_null)
+
 
 #Linear abiotic model
 
@@ -4447,6 +5386,75 @@ Environment_dispersion
 Environment_zero_inflation
 Environment_uniformity
 
+# Null environmental model
+# Contains the sampling/biological controls but no abiotic predictors
+
+Environment_null <- glmmTMB(
+  Visits ~
+    Plant.ID +
+    offset(
+      log(Number.of.Flowers)
+    ) +
+    (1 | Date),
+  family = nbinom2,
+  data = survey_environment2
+)
+
+summary(Environment_null)
+
+# Compare null model with final environmental model
+anova(
+  Environment_null,
+  Environment_final2
+)
+
+# Compare AIC
+AIC(
+  Environment_null,
+  Environment_final2
+)
+#Four-panel diagnostic figure
+
+set.seed(123)
+
+Environment_diagnostics <- simulateResiduals(
+  fittedModel = Environment_final2,
+  n = 1000
+)
+
+par(
+  mfrow = c(2, 2),
+  mar = c(5, 5, 3, 2),
+  cex = 0.8
+)
+
+#Panel 1: QQ residual diagnostic
+plotQQunif(
+  Environment_diagnostics
+)
+
+#Panel 2: Residuals against fitted values
+plotResiduals(
+  Environment_diagnostics,
+  form = fitted(Environment_final2)
+)
+
+#Panel 3: Dispersion diagnostic
+testDispersion(
+  Environment_diagnostics,
+  plot = TRUE
+)
+
+#Panel 4: Zero-inflation diagnostic
+testZeroInflation(
+  Environment_diagnostics,
+  plot = TRUE
+)
+
+#Reset plotting layout
+par(
+  mfrow = c(1, 1)
+)
 ############################################################################
 #9. Does pollinator community composition differ between Site 1 and Site 2?
 ############################################################################
@@ -4522,7 +5530,7 @@ community_matrix_data <- community_data %>%
 #Create metadata
 
 community_metadata <- community_matrix_data %>%
-  select(
+  dplyr::select(
     Sample.ID,
     Site
   ) %>%
@@ -4536,9 +5544,8 @@ community_metadata <- community_matrix_data %>%
 
 
 #Create numeric community matrix
-
 community_matrix <- community_matrix_data %>%
-  select(
+  dplyr::select(
     -Sample.ID,
     -Site
   ) %>%
@@ -4546,7 +5553,6 @@ community_matrix <- community_matrix_data %>%
 
 rownames(community_matrix) <-
   community_matrix_data$Sample.ID
-
 
 #Check community matrix
 
@@ -4711,15 +5717,15 @@ nmds_plot <- ggplot(
   
   scale_colour_manual(
     values = c(
-      "Site 1" = "#7B3294",
-      "Site 2" = "#2E8B57"
+      "Site 1" = "#2E8B57",
+      "Site 2" = "#7B3294"
     )
   ) +
   
   scale_fill_manual(
     values = c(
-      "Site 1" = "#7B3294",
-      "Site 2" = "#2E8B57"
+      "Site 1" = "#2E8B57",
+      "Site 2" = "#7B3294"
     )
   ) +
   
@@ -4760,7 +5766,7 @@ nmds_plot <- ggplot(
   ) +
   
   labs(
-    title = "Pollinator community composition by site",
+    title = "Flower visitor community composition by site",
     x = "NMDS1",
     y = "NMDS2",
     colour = "Site",
@@ -4769,6 +5775,31 @@ nmds_plot <- ggplot(
 
 
 nmds_plot
+
+# Bray-Curtis distances
+site_bray_dist <- vegan::vegdist(
+  community_matrix,
+  method = "bray"
+)
+
+# Test homogeneity of multivariate dispersion
+site_dispersion <- vegan::betadisper(
+  site_bray_dist,
+  community_metadata$Site
+)
+
+# ANOVA
+anova(site_dispersion)
+
+# Permutation test
+set.seed(123)
+
+site_dispersion_test <- vegan::permutest(
+  site_dispersion,
+  permutations = 999
+)
+
+site_dispersion_test
 
 
 ############################################################################
@@ -4855,7 +5886,7 @@ plant_matrix_data <- plant_community_data %>%
 #Create metadata
 
 plant_metadata <- plant_matrix_data %>%
-  select(
+  dplyr::select(
     Site,
     Plant.ID
   )
@@ -4864,7 +5895,7 @@ plant_metadata <- plant_matrix_data %>%
 #Create numeric community matrix
 
 plant_matrix <- plant_matrix_data %>%
-  select(
+  dplyr::select(
     -Site,
     -Plant.ID
   ) %>%
@@ -5122,8 +6153,8 @@ plant_nmds_labelled_plot <- ggplot(
   
   scale_colour_manual(
     values = c(
-      "Site 1" = "#7B3294",
-      "Site 2" = "#2E8B57"
+      "Site 1" = "#2E8B57",
+      "Site 2" = "#7B3294"
     )
   ) +
   
@@ -5195,6 +6226,19 @@ permutest(
   plant_site_dispersion,
   permutations = 999
 )
+
+set.seed(123)
+
+site_nmds <- vegan::metaMDS(
+  community_matrix,
+  distance = "bray",
+  k = 2,
+  trymax = 1000,
+  autotransform = FALSE,
+  trace = FALSE
+)
+
+site_nmds
 ##############################################################################
 #10. Which co-flowering plant species share pollinators with restored species?
 # Analysed separately by site
@@ -5325,7 +6369,7 @@ make_presence_matrix <- function(data, selected_site) {
         Total.Visits > 0
       )
     ) %>%
-    select(
+    dplyr::select(
       Plant.Species,
       Pollinator.Taxon,
       Present
@@ -5431,10 +6475,6 @@ stopifnot(
     colnames(site2_presence)
   )
 )
-
-###################################################
-#11. Calculate shared pollinator taxa across sites
-###################################################
 
 #Rows = Site 2 plants
 #Columns = Site 1 plants
@@ -5603,7 +6643,7 @@ cross_site_shared_heatmap <- ggplot(
   scale_fill_gradient(
     low = "lightgoldenrodyellow",
     high = "darkorange1",
-    name = "Shared\npollinator taxa"
+    name = "Shared\nfloral visitor taxa"
   ) +
   scale_x_discrete(
     labels = site1_labels,
@@ -5614,7 +6654,7 @@ cross_site_shared_heatmap <- ggplot(
     drop = FALSE
   ) +
   labs(
-    title = "Pollinator overlap between plant species across sites",
+    title = "Floral visitor overlap between plant species across sites",
     subtitle = paste0(
       "X-axis = Site 1 plants | ",
       "Y-axis = Site 2 plants"
@@ -5622,8 +6662,8 @@ cross_site_shared_heatmap <- ggplot(
     x = "Plant species at Site 1",
     y = "Plant species at Site 2",
     caption = paste0(
-      "Cell values show the number of shared pollinator taxa. ",
-      "Numbers after plant names show total pollinator richness."
+      "Cell values show the number of shared floral visitor taxa. ",
+      "Numbers after plant names show total floral visitor richness."
     )
   ) +
   theme_classic(
@@ -5677,7 +6717,10 @@ print(
 # at the same site and during the same time period.
 ##############################################################################
 
+head(pollinators)
+
 #Restored plant species
+plant_occasion <- pollinators %>%
   mutate(
     Plant.ID = as.character(Plant.ID),
     
@@ -5694,16 +6737,55 @@ print(
       TRUE ~ NA_character_
     )
   ) %>%
-  select(
+  dplyr::select(
     Site,
     Time.Period,
     Plant.Species
   ) %>%
   distinct()
 
-if (!exists("plant_occasion")) {
-  stop("The object 'plant_occasion' does not exist.")
-}
+
+#Create interaction data
+interaction_data <- pollinators %>%
+  filter(
+    Group != "None",
+    Visits > 0
+  ) %>%
+  mutate(
+    Plant.ID = as.character(Plant.ID),
+    Group = trimws(Group),
+    Species = trimws(Species),
+    
+    Plant.Species = case_when(
+      Plant.ID %in% c("1", "7")   ~ "Hypochaeris radicata",
+      Plant.ID == "2"             ~ "Dianthus deltoides",
+      Plant.ID %in% c("3", "8")   ~ "Thymus drucei",
+      Plant.ID %in% c("4", "9")   ~ "Lotus corniculatus",
+      Plant.ID %in% c("5", "10")  ~ "Silene viscaria",
+      Plant.ID == "6"             ~ "Galium saxatile",
+      Plant.ID == "11"            ~ "Teucrium scorodonia",
+      Plant.ID %in% c("12", "13") ~ "Galium verum",
+      Plant.ID == "14"            ~ "Cirsium arvense",
+      TRUE ~ NA_character_
+    ),
+    
+    #Use species-level identity for bumblebees and butterflies
+    #and broader pollinator groups for all other taxa
+    Pollinator.Taxon = case_when(
+      Group %in% c("Bumblebee", "Butterfly") &
+        !is.na(Species) &
+        Species != "" ~ Species,
+      
+      TRUE ~ Group
+    )
+  ) %>%
+  dplyr::select(
+    Site,
+    Time.Period,
+    Plant.Species,
+    Pollinator.Taxon,
+    Visits
+  )
 
 
 restored_species <- c(
@@ -5736,7 +6818,7 @@ required_interaction_columns <- c(
   "Visits"
 )
 
-``
+
 missing_occasion_columns <- setdiff(
   required_occasion_columns,
   names(plant_occasion)
@@ -5765,8 +6847,6 @@ if (length(missing_interaction_columns) > 0) {
     )
   )
 }
-
-
 #Clean and standardise data
 
 plant_occasion_clean <- plant_occasion %>%
@@ -6087,7 +7167,7 @@ print(
 # Full screening table
 
 native_screening_results <- potential_interactions %>%
-  select(
+ dplyr:: select(
     Site,
     Restored.Species,
     Native.Species,
@@ -6173,7 +7253,7 @@ interaction_plot_data <- potential_interactions %>%
 
 print(
   interaction_plot_data %>%
-    select(
+    dplyr:: select(
       Site,
       Restored.Species,
       Native.Species,
@@ -6347,7 +7427,7 @@ interaction_plot <- ggplot(
   ) +
   
   scale_size_continuous(
-    name = "Shared time periods",
+    name = "Shared events",
     range = c(
       3,
       10
@@ -6355,17 +7435,17 @@ interaction_plot <- ggplot(
   ) +
   
   labs(
-    x = "Number of shared pollinator taxa",
-    y = "Native plant species",
+    x = "Number of shared visitor taxa",
+    y = "Non-restored plant species",
     
     title = paste0(
-      "Shared pollinator use between restored ",
-      "and native plant species"
+      "Shared flower visitor use between restored ",
+      "and non-restored plant species"
     ),
     
     subtitle = paste0(
       "Larger points indicate more time-period × ",
-      "pollinator sharing events"
+      "visitor sharing events"
     )
   ) +
   
@@ -6428,9 +7508,67 @@ print(
   interaction_plot
 )
 
+sharing_appendix_table <- potential_interactions %>%
+  dplyr::select(
+    Site,
+    Restored.Species,
+    Native.Species,
+    Overlapping.Time.Periods,
+    Shared.Pollinator.Taxa,
+    Time.Period.Sharing.Events,
+    Time.Periods.With.Shared.Pollinators
+  ) %>%
+  dplyr::rename(
+    "Site" = Site,
+    "Restored species" = Restored.Species,
+    "Non-restored species" = Native.Species,
+    "Overlapping time periods" = Overlapping.Time.Periods,
+    "Shared floral visitor taxa" = Shared.Pollinator.Taxa,
+    "Time period × visitor sharing events" =
+      Time.Period.Sharing.Events,
+    "Time periods with shared floral visitors" =
+      Time.Periods.With.Shared.Pollinators
+  )
+
+# View the complete table
+print(
+  sharing_appendix_table,
+  n = Inf
+)
+
+# Open it in the RStudio data viewer
+View(sharing_appendix_table)
 #############################
 #13. Maiden Pink Pollinators
 #############################
+
+site_colours <- c(
+  "Site 1" = "#1B9E77",
+  "Site 2" = "#7570B3"
+)
+
+#Create flower-visitor taxon label
+
+community_data <- pollinators %>%
+  filter(
+    Group != "None",
+    Visits > 0
+  ) %>%
+  mutate(
+    Plant.ID = as.numeric(as.character(Plant.ID)),
+    Site = as.numeric(as.character(Site)),
+    
+    Pollinator.Taxon = case_when(
+      !is.na(Species) & Species != "" ~ Species,
+      !is.na(Genus) & Genus != "" ~ paste0(Genus, " sp."),
+      !is.na(Family) & Family != "" ~ paste0(Family, " family"),
+      !is.na(Order) & Order != "" ~ paste0(Order, " order"),
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(
+    !is.na(Pollinator.Taxon)
+  )
 
 # Pollinator taxa recorded visiting Maiden pink at Site 1
 dianthus_taxa <- community_data %>%
@@ -6540,6 +7678,153 @@ site2_connectance <- bipartite::networklevel(
 site1_connectance
 site2_connectance
 
+#Plot
+
+dianthus_plot_data <- community_data %>%
+  filter(
+    Site == 1,
+    Plant.ID == 2
+  ) %>%
+  group_by(
+    Pollinator.Taxon
+  ) %>%
+  summarise(
+    Total.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Site2.Status = if_else(
+      Pollinator.Taxon %in% site2_taxa,
+      "Also recorded at Site 2",
+      "Not recorded at Site 2"
+    )
+  ) %>%
+  arrange(
+    Total.Visits
+  ) %>%
+  mutate(
+    Pollinator.Taxon = factor(
+      Pollinator.Taxon,
+      levels = Pollinator.Taxon
+    )
+  )
+
+
+#Check data
+
+dianthus_plot_data
+##################################
+#Maiden pink flower visitors
+##################################
+
+#Prepare data
+
+dianthus_plot_data <- community_data %>%
+  filter(
+    Site == 1,
+    Plant.ID == 2
+  ) %>%
+  group_by(
+    Pollinator.Taxon
+  ) %>%
+  summarise(
+    Total.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Site.Status = if_else(
+      Pollinator.Taxon %in% site2_taxa,
+      "Also recorded at Site 2",
+      "Only recorded at Site 1"
+    )
+  ) %>%
+  arrange(
+    Total.Visits
+  ) %>%
+  mutate(
+    Pollinator.Taxon = factor(
+      Pollinator.Taxon,
+      levels = Pollinator.Taxon
+    )
+  )
+
+
+#Plot
+
+MaidenPink_plot <- ggplot(
+  dianthus_plot_data,
+  aes(
+    x = Total.Visits,
+    y = Pollinator.Taxon,
+    fill = Site.Status
+  )
+) +
+  
+  geom_col(
+    width = 0.7
+  ) +
+  
+  geom_text(
+    aes(
+      label = Total.Visits
+    ),
+    hjust = -0.3,
+    size = 4
+  ) +
+  
+  scale_fill_manual(
+    values = c(
+      "Only recorded at Site 1" = "#1B9E77",
+      "Also recorded at Site 2" = "#7570B3"
+    ),
+    breaks = c(
+      "Only recorded at Site 1",
+      "Also recorded at Site 2"
+    ),
+    name = "Visitor distribution"
+  ) +
+  
+  scale_x_continuous(
+    expand = expansion(
+      mult = c(
+        0,
+        0.12
+      )
+    )
+  ) +
+  
+  labs(
+    x = "Number of visits",
+    y = "Flower-visitor taxon"
+  ) +
+  
+  theme_classic(
+    base_size = 13
+  ) +
+  
+  theme(
+    axis.text.y = element_text(
+      size = 11
+    ),
+    
+    axis.title = element_text(
+      size = 13
+    ),
+    
+    legend.position = "bottom",
+    
+    legend.title = element_text(
+      face = "bold"
+    )
+  )
+
+MaidenPink_plot
 ########################
 #Extra Analysis/Appendix
 ########################
@@ -6683,6 +7968,112 @@ catchfly_pollinators <- catchfly %>%
 
 catchfly_pollinators
 
+##################################
+#Sticky catchfly flower visitors
+##################################
+
+site_colours <- c(
+  "1" = "#1B9E77",
+  "2" = "#7570B3"
+)
+
+catchfly_plot_data <- catchfly_pollinators %>%
+  mutate(
+    Site = factor(
+      Site,
+      levels = c("1", "2"),
+      labels = c("Site 1", "Site 2")
+    )
+  ) %>%
+  group_by(
+    Pollinator.Taxon
+  ) %>%
+  mutate(
+    Total.Taxon.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    )
+  ) %>%
+  ungroup() %>%
+  arrange(
+    Total.Taxon.Visits
+  ) %>%
+  mutate(
+    Pollinator.Taxon = factor(
+      Pollinator.Taxon,
+      levels = unique(Pollinator.Taxon)
+    )
+  )
+
+
+#Plot
+
+Catchfly_plot <- ggplot(
+  catchfly_plot_data,
+  aes(
+    x = Visits,
+    y = Pollinator.Taxon,
+    fill = Site
+  )
+) +
+  
+  geom_col(
+    position = position_dodge(
+      width = 0.75
+    ),
+    width = 0.68
+  ) +
+  
+  geom_text(
+    aes(
+      label = Visits
+    ),
+    position = position_dodge(
+      width = 0.75
+    ),
+    hjust = -0.25,
+    size = 4
+  ) +
+  
+  scale_fill_manual(
+    values = c(
+      "Site 1" = "#1B9E77",
+      "Site 2" = "#7570B3"
+    )
+  ) +
+  
+  scale_x_continuous(
+    expand = expansion(
+      mult = c(
+        0,
+        0.12
+      )
+    )
+  ) +
+  
+  labs(
+    x = "Number of visits",
+    y = "Flower-visitor taxon",
+    fill = NULL
+  ) +
+  
+  theme_classic(
+    base_size = 13
+  ) +
+  
+  theme(
+    axis.text.y = element_text(
+      size = 11
+    ),
+    
+    axis.title = element_text(
+      size = 13
+    ),
+    
+    legend.position = "bottom"
+  )
+
+Catchfly_plot
 
 ####################################
 #16. Overall descriptive statistics
@@ -7553,3 +8944,1835 @@ Pollinator_appendix <- pollinators %>%
   )
 
 Pollinator_appendix
+
+#Floral Abundance
+
+floral_abundance_table <- pollinators %>%
+  dplyr::mutate(
+    Plant.ID = factor(
+      Plant.ID,
+      levels = 1:14
+    )
+  ) %>%
+  dplyr::left_join(
+    plant_names,
+    by = "Plant.ID"
+  ) %>%
+  dplyr::mutate(
+    Abundance.Method = dplyr::case_when(
+      Plant.Species %in% c(
+        "Galium saxatile",
+        "Thymus drucei",
+        "Galium verum",
+        "Teucrium scorodonia"
+      ) ~ "Quadrat estimate",
+      
+      Plant.Species == "Lotus corniculatus" ~
+        "Direct count / quadrat estimate where necessary",
+      
+      TRUE ~ "Direct count"
+    )
+  ) %>%
+  dplyr::distinct(
+    Date,
+    Site,
+    Plant.ID,
+    Plant.Species,
+    Abundance,
+    Abundance.Method
+  ) %>%
+  dplyr::arrange(
+    Date,
+    Site,
+    Plant.ID
+  )
+
+as.data.frame(floral_abundance_table)
+
+~/Downloads/Dissertation
+setwd("~/Downloads/Dissertation")
+getwd()
+pollinators <- read.csv(
+  "Pollinators.csv",
+  header = TRUE,
+  stringsAsFactors = FALSE
+)
+
+pollinators %>%
+  dplyr::filter(
+    Date == "02/07/2026",
+    Site == 2,
+    Plant.ID == 9
+  ) %>%
+  dplyr::distinct(
+    Replication,
+    Time.Period,
+    Abundance
+  )
+
+final_floral_abundance_table <- floral_abundance_table %>%
+  dplyr::mutate(
+    Date = dplyr::case_when(
+      Date == "03/07/2026" ~ "02/07/2026",
+      TRUE ~ Date
+    )
+  ) %>%
+  dplyr::distinct(
+    Site,
+    Plant.ID,
+    Plant.Species,
+    Date,
+    Abundance,
+    Abundance.Method
+  ) %>%
+  dplyr::arrange(
+    Site,
+    Plant.ID,
+    Date
+  )
+
+as.data.frame(final_floral_abundance_table)
+
+# Final appendix table: distinct floral abundance estimates
+
+floral_abundance_appendix <- final_floral_abundance_table %>%
+  dplyr::select(
+    Site,
+    Plant.ID,
+    Plant.Species,
+    Abundance,
+    Abundance.Method
+  ) %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(
+    Site,
+    Plant.ID,
+    Abundance
+  )
+
+as.data.frame(floral_abundance_appendix)
+
+#Total visitation
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Plant ID to species name
+plant_key <- c(
+  "1"  = "Hypochaeris radicata",
+  "2"  = "Dianthus deltoides",
+  "3"  = "Thymus drucei",
+  "4"  = "Lotus corniculatus",
+  "5"  = "Silene viscaria",
+  "6"  = "Galium saxatile",
+  "7"  = "Hypochaeris radicata",
+  "8"  = "Thymus drucei",
+  "9"  = "Lotus corniculatus",
+  "10" = "Silene viscaria",
+  "11" = "Teucrium scorodonia",
+  "12" = "Galium verum",
+  "13" = "Galium verum",
+  "14" = "Cirsium arvense"
+)
+
+# Add plant species names
+plant_data <- pollinators %>%
+  mutate(
+    Plant.Species = unname(
+      plant_key[as.character(Plant.ID)]
+    )
+  )
+
+# All plant species actually surveyed at each site
+surveyed_plants <- plant_data %>%
+  filter(
+    !is.na(Plant.Species)
+  ) %>%
+  distinct(
+    Site,
+    Plant.Species
+  )
+
+# Total individual visits per plant species
+plant_visits <- plant_data %>%
+  filter(
+    Group != "None",
+    !is.na(Plant.Species)
+  ) %>%
+  group_by(
+    Site,
+    Plant.Species
+  ) %>%
+  summarise(
+    Total.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+# Join totals back onto all surveyed plants
+# Species with no visits become 0
+visitation_plot_data <- surveyed_plants %>%
+  left_join(
+    plant_visits,
+    by = c(
+      "Site",
+      "Plant.Species"
+    )
+  ) %>%
+  mutate(
+    Total.Visits = replace_na(
+      Total.Visits,
+      0
+    ),
+    
+    Plant.Type = if_else(
+      Plant.Species %in% c(
+        "Dianthus deltoides",
+        "Silene viscaria"
+      ),
+      "Restored species",
+      "Non-restored species"
+    )
+  )
+
+# Order species by total visits separately within each site
+visitation_plot_data <- visitation_plot_data %>%
+  arrange(
+    Site,
+    Total.Visits
+  ) %>%
+  mutate(
+    Plant.Site = factor(
+      paste(
+        Plant.Species,
+        Site,
+        sep = "___"
+      ),
+      levels = unique(
+        paste(
+          Plant.Species,
+          Site,
+          sep = "___"
+        )
+      )
+    )
+  )
+
+# Plot
+ggplot(
+  visitation_plot_data,
+  aes(
+    x = Total.Visits,
+    y = Plant.Site,
+    fill = Plant.Type
+  )
+) +
+  geom_col(
+    width = 0.75
+  ) +
+  facet_wrap(
+    ~ Site,
+    ncol = 1,
+    scales = "free_y",
+    labeller = labeller(
+      Site = c(
+        "1" = "Site 1",
+        "2" = "Site 2"
+      )
+    )
+  ) +
+  scale_y_discrete(
+    labels = function(x) {
+      sub(
+        "___.*$",
+        "",
+        x
+      )
+    }
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Non-restored species" = "forestgreen",
+      "Restored species" = "#E7298A"
+    )
+  ) +
+  labs(
+    x = "Total Floral Visitor Visits",
+    y = "Plant Species",
+    fill = NULL
+  ) +
+  theme_classic(
+    base_size = 14
+  ) +
+  theme(
+    strip.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+    strip.text = element_text(
+      face = "bold"
+    ),
+    legend.position = "bottom"
+  )
+
+#More summary statisitcs
+table(pollinators$Group, useNA = "ifany")
+
+nrow(pollinators)
+
+sum(pollinators$Group != "None", na.rm = TRUE)
+
+sum(pollinators$Visits[pollinators$Group != "None"], na.rm = TRUE)
+
+##################################
+#Plant-flower visitor Network Figures
+##################################
+
+library(dplyr)
+library(tidyr)
+library(tibble)
+
+
+#Plant species and categories
+
+plant_key <- c(
+  "1"  = "Hypochaeris radicata",
+  "2"  = "Dianthus deltoides",
+  "3"  = "Thymus drucei",
+  "4"  = "Lotus corniculatus",
+  "5"  = "Silene viscaria",
+  "6"  = "Galium saxatile",
+  "7"  = "Hypochaeris radicata",
+  "8"  = "Thymus drucei",
+  "9"  = "Lotus corniculatus",
+  "10" = "Silene viscaria",
+  "11" = "Teucrium scorodonia",
+  "12" = "Galium verum",
+  "13" = "Galium verum",
+  "14" = "Cirsium arvense"
+)
+
+plant_order <- c(
+  "Hypochaeris radicata",
+  "Dianthus deltoides",
+  "Thymus drucei",
+  "Lotus corniculatus",
+  "Silene viscaria",
+  "Galium saxatile",
+  "Teucrium scorodonia",
+  "Galium verum",
+  "Cirsium arvense"
+)
+
+restored_plants <- c(
+  "Dianthus deltoides",
+  "Silene viscaria"
+)
+
+restored_colour <- "#E7298A"
+
+other_plant_colour <- "black"
+
+time_period_order <- c(
+  "1",
+  "2",
+  "3"
+)
+
+
+#Clean network text
+
+clean_network_text <- function(x) {
+  
+  x <- as.character(x)
+  
+  x <- gsub(
+    "\u00A0",
+    " ",
+    x,
+    fixed = TRUE
+  )
+  
+  x <- gsub(
+    "[[:space:]]+",
+    " ",
+    x
+  )
+  
+  trimws(x)
+}
+
+
+#Prepare network data
+
+network_figure_data <- pollinators %>%
+  mutate(
+    
+    Species = clean_network_text(Species),
+    Genus = clean_network_text(Genus),
+    Family = clean_network_text(Family),
+    Order = clean_network_text(Order),
+    Group = clean_network_text(Group),
+    
+    Plant.ID = as.character(
+      Plant.ID
+    ),
+    
+    Site = as.character(
+      Site
+    ),
+    
+    Time.Period = as.character(
+      Time.Period
+    ),
+    
+    Plant.Species = unname(
+      plant_key[
+        Plant.ID
+      ]
+    ),
+    
+    Family.Network = case_when(
+      
+      !is.na(Family) &
+        Family != "" ~
+        Family,
+      
+      !is.na(Order) &
+        Order != "" ~
+        paste0(
+          Order,
+          " unidentified"
+        ),
+      
+      TRUE ~
+        "Unidentified"
+    ),
+    
+    #Internal name remains Pollinator but represents flower visitors
+    
+    Pollinator = case_when(
+      
+      !is.na(Species) &
+        Species != "" ~
+        Species,
+      
+      !is.na(Genus) &
+        Genus != "" ~
+        paste0(
+          Genus,
+          " sp."
+        ),
+      
+      !is.na(Family) &
+        Family != "" ~
+        paste0(
+          Family,
+          " family"
+        ),
+      
+      !is.na(Order) &
+        Order != "" ~
+        paste0(
+          Order,
+          " order"
+        ),
+      
+      TRUE ~
+        NA_character_
+    ),
+    
+    Visit.Rate = case_when(
+      
+      !is.na(Visits) &
+        !is.na(Number.of.Flowers) &
+        Number.of.Flowers > 0 ~
+        Visits / Number.of.Flowers,
+      
+      TRUE ~
+        NA_real_
+    )
+  )
+
+
+#Interaction data
+
+network_interactions <- network_figure_data %>%
+  filter(
+    Group != "None",
+    Visits > 0,
+    !is.na(Visit.Rate),
+    Visit.Rate > 0,
+    !is.na(Plant.Species),
+    Plant.Species != "",
+    !is.na(Pollinator),
+    Pollinator != "",
+    !is.na(Site),
+    Site != "",
+    !is.na(Time.Period),
+    Time.Period != ""
+  )
+
+
+#Floral data
+
+network_flowers <- network_figure_data %>%
+  filter(
+    !is.na(Plant.Species),
+    Plant.Species != "",
+    !is.na(Abundance),
+    Abundance > 0,
+    !is.na(Site),
+    Site != "",
+    !is.na(Time.Period),
+    Time.Period != ""
+  ) %>%
+  distinct(
+    Date,
+    Site,
+    Block,
+    Replication,
+    Time.Period,
+    Plant.ID,
+    Start.Time,
+    .keep_all = TRUE
+  )
+
+
+#Flower visitor colours
+
+pollinator_families <- sort(
+  unique(
+    network_interactions$Family.Network
+  )
+)
+
+family_colours <- grDevices::hcl.colors(
+  n = length(
+    pollinator_families
+  ),
+  palette = "Dark 3"
+)
+
+names(
+  family_colours
+) <- pollinator_families
+
+
+#Labels
+
+abbreviate_pollinator <- function(x) {
+  
+  vapply(
+    as.character(x),
+    
+    function(label) {
+      
+      if (
+        grepl(
+          " family$| order$| unidentified$| sp\\.$",
+          label,
+          ignore.case = TRUE
+        )
+      ) {
+        
+        return(
+          label
+        )
+      }
+      
+      words <- strsplit(
+        label,
+        "[[:space:]]+"
+      )[[1]]
+      
+      if (
+        length(words) >= 2
+      ) {
+        
+        return(
+          paste0(
+            substr(
+              words[1],
+              1,
+              1
+            ),
+            ". ",
+            paste(
+              words[-1],
+              collapse = " "
+            )
+          )
+        )
+      }
+      
+      label
+    },
+    
+    character(1)
+  )
+}
+
+
+abbreviate_plant <- function(x) {
+  
+  vapply(
+    as.character(x),
+    
+    function(label) {
+      
+      words <- strsplit(
+        label,
+        "[[:space:]]+"
+      )[[1]]
+      
+      if (
+        length(words) >= 2
+      ) {
+        
+        return(
+          paste0(
+            substr(
+              words[1],
+              1,
+              1
+            ),
+            ". ",
+            paste(
+              words[-1],
+              collapse = " "
+            )
+          )
+        )
+      }
+      
+      label
+    },
+    
+    character(1)
+  )
+}
+
+
+#Bar positions
+
+make_bar_positions <- function(
+    labels,
+    weights,
+    left = 0.04,
+    right = 0.88,
+    gap = 0.012
+) {
+  
+  if (
+    length(labels) == 0
+  ) {
+    
+    return(
+      tibble(
+        Label = character(),
+        Start = numeric(),
+        End = numeric(),
+        Centre = numeric()
+      )
+    )
+  }
+  
+  weights[
+    !is.finite(weights) |
+      weights <= 0
+  ] <- 0
+  
+  transformed <- sqrt(
+    weights
+  )
+  
+  if (
+    max(
+      transformed,
+      na.rm = TRUE
+    ) == 0
+  ) {
+    
+    transformed <- rep(
+      1,
+      length(labels)
+    )
+  }
+  
+  minimum_width <- max(
+    transformed
+  ) * 0.05
+  
+  transformed <- pmax(
+    transformed,
+    minimum_width
+  )
+  
+  available_width <-
+    right -
+    left -
+    gap * (
+      length(labels) - 1
+    )
+  
+  widths <-
+    transformed /
+    sum(transformed) *
+    available_width
+  
+  starts <- cumsum(
+    c(
+      left,
+      head(
+        widths,
+        -1
+      ) +
+        gap
+    )
+  )
+  
+  ends <-
+    starts +
+    widths
+  
+  tibble(
+    Label = labels,
+    Start = starts,
+    End = ends,
+    Centre = (
+      starts +
+        ends
+    ) / 2
+  )
+}
+
+
+#Draw network panel
+
+draw_network_panel <- function(
+    site,
+    time_period = NULL,
+    panel_letter,
+    panel_title,
+    show_pollinator_labels = FALSE
+) {
+  
+  site <- as.character(
+    site
+  )
+  
+  panel_interactions <- network_interactions %>%
+    filter(
+      Site == site
+    )
+  
+  panel_flowers <- network_flowers %>%
+    filter(
+      Site == site
+    )
+  
+  if (
+    !is.null(
+      time_period
+    )
+  ) {
+    
+    time_period <- as.character(
+      time_period
+    )
+    
+    panel_interactions <- panel_interactions %>%
+      filter(
+        Time.Period ==
+          time_period
+      )
+    
+    panel_flowers <- panel_flowers %>%
+      filter(
+        Time.Period ==
+          time_period
+      )
+  }
+  
+  
+  plot(
+    NA,
+    xlim = c(
+      -0.10,
+      1.30
+    ),
+    ylim = c(
+      -0.30,
+      1.34
+    ),
+    type = "n",
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    xaxs = "i",
+    yaxs = "i"
+  )
+  
+  
+  text(
+    x = -0.05,
+    y = 1.23,
+    labels = paste0(
+      panel_letter,
+      ") ",
+      panel_title
+    ),
+    adj = c(
+      0,
+      0.5
+    ),
+    cex = 1.25,
+    font = 2
+  )
+  
+  
+  #Floral abundance
+  
+  floral_summary <- panel_flowers %>%
+    group_by(
+      Plant.Species
+    ) %>%
+    summarise(
+      Floral.Abundance = mean(
+        Abundance,
+        na.rm = TRUE
+      ),
+      .groups = "drop"
+    ) %>%
+    filter(
+      is.finite(
+        Floral.Abundance
+      ),
+      Floral.Abundance > 0
+    )
+  
+  
+  plants_with_visits <- unique(
+    panel_interactions$Plant.Species
+  )
+  
+  plants_present <- union(
+    floral_summary$Plant.Species,
+    plants_with_visits
+  )
+  
+  plants_present <- plant_order[
+    plant_order %in%
+      plants_present
+  ]
+  
+  
+  plant_summary <- tibble(
+    Plant.Species =
+      plants_present
+  ) %>%
+    left_join(
+      floral_summary,
+      by = "Plant.Species"
+    ) %>%
+    mutate(
+      Floral.Abundance = replace_na(
+        Floral.Abundance,
+        1
+      )
+    )
+  
+  
+  plant_positions <- make_bar_positions(
+    labels =
+      plant_summary$Plant.Species,
+    
+    weights =
+      plant_summary$Floral.Abundance,
+    
+    left =
+      0.04,
+    
+    right =
+      0.88,
+    
+    gap =
+      0.015
+  ) %>%
+    rename(
+      Plant.Species =
+        Label
+    )
+  
+  
+  #Flower visitor totals
+  
+  pollinator_summary <- panel_interactions %>%
+    group_by(
+      Pollinator
+    ) %>%
+    summarise(
+      Total.Rate = sum(
+        Visit.Rate,
+        na.rm = TRUE
+      ),
+      
+      Family.Network = first(
+        Family.Network
+      ),
+      
+      .groups = "drop"
+    ) %>%
+    arrange(
+      desc(
+        Total.Rate
+      ),
+      Pollinator
+    )
+  
+  
+  pollinator_positions <- make_bar_positions(
+    labels =
+      pollinator_summary$Pollinator,
+    
+    weights =
+      pollinator_summary$Total.Rate,
+    
+    left =
+      0.04,
+    
+    right =
+      0.88,
+    
+    gap =
+      0.008
+  ) %>%
+    rename(
+      Pollinator =
+        Label
+    ) %>%
+    left_join(
+      pollinator_summary %>%
+        dplyr::select(
+          Pollinator,
+          Family.Network
+        ),
+      by = "Pollinator"
+    )
+  
+  
+  #Interaction links
+  
+  links <- panel_interactions %>%
+    group_by(
+      Plant.Species,
+      Pollinator,
+      Family.Network
+    ) %>%
+    summarise(
+      Weight = sum(
+        Visit.Rate,
+        na.rm = TRUE
+      ),
+      .groups = "drop"
+    ) %>%
+    left_join(
+      plant_positions %>%
+        dplyr::select(
+          Plant.Species,
+          Plant.X =
+            Centre
+        ),
+      by = "Plant.Species"
+    ) %>%
+    left_join(
+      pollinator_positions %>%
+        dplyr::select(
+          Pollinator,
+          Pollinator.X =
+            Centre
+        ),
+      by = "Pollinator"
+    ) %>%
+    filter(
+      !is.na(
+        Plant.X
+      ),
+      !is.na(
+        Pollinator.X
+      )
+    )
+  
+  
+  #Draw links
+  
+  if (
+    nrow(
+      links
+    ) > 0
+  ) {
+    
+    transformed_links <- sqrt(
+      links$Weight
+    )
+    
+    if (
+      max(
+        transformed_links
+      ) ==
+      min(
+        transformed_links
+      )
+    ) {
+      
+      link_widths <- rep(
+        2,
+        nrow(
+          links
+        )
+      )
+      
+    } else {
+      
+      link_widths <- 0.8 +
+        3.2 *
+        (
+          transformed_links -
+            min(
+              transformed_links
+            )
+        ) /
+        (
+          max(
+            transformed_links
+          ) -
+            min(
+              transformed_links
+            )
+        )
+    }
+    
+    
+    for (
+      i in seq_len(
+        nrow(
+          links
+        )
+      )
+    ) {
+      
+      link_colour <- family_colours[
+        links$Family.Network[i]
+      ]
+      
+      if (
+        is.na(
+          link_colour
+        )
+      ) {
+        
+        link_colour <- "grey50"
+      }
+      
+      segments(
+        x0 =
+          links$Plant.X[i],
+        
+        y0 =
+          0.22,
+        
+        x1 =
+          links$Pollinator.X[i],
+        
+        y1 =
+          0.82,
+        
+        col =
+          grDevices::adjustcolor(
+            link_colour,
+            alpha.f = 0.42
+          ),
+        
+        lwd =
+          link_widths[i],
+        
+        lend =
+          "butt"
+      )
+    }
+  }
+  
+  
+  #Plant bars and labels
+  
+  if (
+    nrow(
+      plant_positions
+    ) > 0
+  ) {
+    
+    plant_colours <- ifelse(
+      plant_positions$Plant.Species %in%
+        restored_plants,
+      
+      restored_colour,
+      
+      other_plant_colour
+    )
+    
+    rect(
+      xleft =
+        plant_positions$Start,
+      
+      ybottom =
+        0.14,
+      
+      xright =
+        plant_positions$End,
+      
+      ytop =
+        0.22,
+      
+      col =
+        plant_colours,
+      
+      border =
+        plant_colours
+    )
+    
+    text(
+      x =
+        plant_positions$Centre,
+      
+      y =
+        0.115,
+      
+      labels =
+        abbreviate_plant(
+          plant_positions$Plant.Species
+        ),
+      
+      srt =
+        45,
+      
+      adj = c(
+        1,
+        0.5
+      ),
+      
+      cex =
+        0.95,
+      
+      font =
+        3,
+      
+      xpd =
+        NA
+    )
+  }
+  
+  
+  #Flower visitor bars and labels
+  
+  if (
+    nrow(
+      pollinator_positions
+    ) > 0
+  ) {
+    
+    pollinator_colours <-
+      family_colours[
+        pollinator_positions$Family.Network
+      ]
+    
+    pollinator_colours[
+      is.na(
+        pollinator_colours
+      )
+    ] <- "grey50"
+    
+    
+    rect(
+      xleft =
+        pollinator_positions$Start,
+      
+      ybottom =
+        0.82,
+      
+      xright =
+        pollinator_positions$End,
+      
+      ytop =
+        0.91,
+      
+      col =
+        pollinator_colours,
+      
+      border =
+        pollinator_colours
+    )
+    
+    
+    if (
+      show_pollinator_labels
+    ) {
+      
+      text(
+        x =
+          pollinator_positions$Centre,
+        
+        y =
+          0.935,
+        
+        labels =
+          abbreviate_pollinator(
+            pollinator_positions$Pollinator
+          ),
+        
+        srt =
+          90,
+        
+        adj = c(
+          0,
+          0.5
+        ),
+        
+        cex =
+          0.90,
+        
+        col =
+          pollinator_colours,
+        
+        xpd =
+          NA
+      )
+    }
+  }
+  
+  
+  #Total link frequency and total link richness
+  
+  total_link_frequency <- sum(
+    panel_interactions$Visits,
+    na.rm = TRUE
+  )
+  
+  total_link_richness <- nrow(
+    links
+  )
+  
+  
+  text(
+    x = 0.93,
+    y = 0.66,
+    
+    labels = paste0(
+      "Total link frequency: ",
+      total_link_frequency,
+      "\nTotal link richness: ",
+      total_link_richness
+    ),
+    
+    adj = c(
+      0,
+      1
+    ),
+    
+    cex =
+      0.82,
+    
+    font =
+      2
+  )
+  
+  
+  #No flower visitors
+  
+  if (
+    nrow(
+      panel_interactions
+    ) == 0
+  ) {
+    
+    text(
+      x = 0.47,
+      y = 0.52,
+      labels =
+        "No flower visitors recorded",
+      cex = 0.95
+    )
+  }
+  
+  
+  invisible(
+    NULL
+  )
+}
+
+
+#Legend
+
+draw_network_legend <- function(
+    site
+) {
+  
+  site_families <- network_interactions %>%
+    filter(
+      Site ==
+        as.character(
+          site
+        )
+    ) %>%
+    distinct(
+      Family.Network
+    ) %>%
+    arrange(
+      Family.Network
+    ) %>%
+    pull(
+      Family.Network
+    )
+  
+  
+  plot(
+    NA,
+    xlim = c(
+      0,
+      1
+    ),
+    ylim = c(
+      0,
+      1
+    ),
+    type = "n",
+    axes = FALSE,
+    xlab = "",
+    ylab = ""
+  )
+  
+  
+  text(
+    x = 0.5,
+    y = 0.88,
+    labels =
+      "Flower-visitor family",
+    font = 2,
+    cex = 1.15
+  )
+  
+  
+  if (
+    length(
+      site_families
+    ) > 0
+  ) {
+    
+    columns <- min(
+      4,
+      length(
+        site_families
+      )
+    )
+    
+    rows <- ceiling(
+      length(
+        site_families
+      ) /
+        columns
+    )
+    
+    
+    x_positions <- rep(
+      seq(
+        0.05,
+        0.78,
+        length.out =
+          columns
+      ),
+      times =
+        rows
+    )[
+      seq_along(
+        site_families
+      )
+    ]
+    
+    
+    y_positions <- rep(
+      seq(
+        0.66,
+        0.46,
+        length.out =
+          rows
+      ),
+      each =
+        columns
+    )[
+      seq_along(
+        site_families
+      )
+    ]
+    
+    
+    rect(
+      xleft =
+        x_positions,
+      
+      ybottom =
+        y_positions - 0.03,
+      
+      xright =
+        x_positions + 0.025,
+      
+      ytop =
+        y_positions + 0.03,
+      
+      col =
+        family_colours[
+          site_families
+        ],
+      
+      border =
+        family_colours[
+          site_families
+        ]
+    )
+    
+    
+    text(
+      x =
+        x_positions + 0.035,
+      
+      y =
+        y_positions,
+      
+      labels =
+        site_families,
+      
+      adj = c(
+        0,
+        0.5
+      ),
+      
+      cex =
+        0.90
+    )
+  }
+  
+  
+  #Plant category
+  
+  text(
+    x = 0.5,
+    y = 0.27,
+    labels =
+      "Plant category",
+    font = 2,
+    cex = 1.15
+  )
+  
+  
+  rect(
+    xleft = c(
+      0.25,
+      0.60
+    ),
+    
+    ybottom =
+      0.10,
+    
+    xright = c(
+      0.275,
+      0.625
+    ),
+    
+    ytop =
+      0.17,
+    
+    col = c(
+      other_plant_colour,
+      restored_colour
+    ),
+    
+    border = c(
+      other_plant_colour,
+      restored_colour
+    )
+  )
+  
+  
+  text(
+    x = c(
+      0.285,
+      0.635
+    ),
+    
+    y =
+      0.135,
+    
+    labels = c(
+      "Non-restored plants",
+      "Restored plants"
+    ),
+    
+    adj = c(
+      0,
+      0.5
+    ),
+    
+    cex =
+      0.95
+  )
+}
+
+
+#Complete page for each site
+
+plot_site_network <- function(
+    site
+) {
+  
+  site <- as.character(
+    site
+  )
+  
+  
+  layout(
+    matrix(
+      1:5,
+      nrow = 5,
+      ncol = 1
+    ),
+    heights = c(
+      1.45,
+      1.10,
+      1.10,
+      1.10,
+      0.65
+    )
+  )
+  
+  
+  par(
+    oma = c(
+      0,
+      0,
+      2.5,
+      0
+    )
+  )
+  
+  
+  par(
+    mar = c(
+      0.6,
+      0.4,
+      0.8,
+      0.4
+    )
+  )
+  
+  
+  #Overall
+  
+  draw_network_panel(
+    site =
+      site,
+    
+    panel_letter =
+      "a",
+    
+    panel_title =
+      "Overall",
+    
+    show_pollinator_labels =
+      TRUE
+  )
+  
+  
+  #Time period 1
+  
+  draw_network_panel(
+    site =
+      site,
+    
+    time_period =
+      "1",
+    
+    panel_letter =
+      "b",
+    
+    panel_title =
+      "Time period 1"
+  )
+  
+  
+  #Time period 2
+  
+  draw_network_panel(
+    site =
+      site,
+    
+    time_period =
+      "2",
+    
+    panel_letter =
+      "c",
+    
+    panel_title =
+      "Time period 2"
+  )
+  
+  
+  #Time period 3
+  
+  draw_network_panel(
+    site =
+      site,
+    
+    time_period =
+      "3",
+    
+    panel_letter =
+      "d",
+    
+    panel_title =
+      "Time period 3"
+  )
+  
+  
+  #Legend
+  
+  draw_network_legend(
+    site
+  )
+  
+  
+  #Site title
+  
+  mtext(
+    paste(
+      "Site",
+      site
+    ),
+    side = 3,
+    outer = TRUE,
+    line = 0.5,
+    cex = 1.9,
+    font = 2
+  )
+  
+  
+  invisible(
+    NULL
+  )
+}
+
+
+#Check network data
+
+table(
+  network_interactions$Site,
+  network_interactions$Time.Period
+)
+
+
+#Preview Site 1
+
+plot_site_network(
+  "1"
+)
+
+
+#Save Site 1 and Site 2 on separate pages
+
+pdf(
+  "Plant_flower_visitor_networks_by_site.pdf",
+  width = 15,
+  height = 17,
+  family = "sans",
+  onefile = TRUE
+)
+
+plot_site_network(
+  "1"
+)
+
+plot_site_network(
+  "2"
+)
+
+dev.off()
+
+
+#Preview Site 1
+
+plot_site_network(
+  "1"
+)
+
+
+#Preview Site 2
+
+plot_site_network(
+  "2"
+)
+
+#Butterflies
+]library(dplyr)
+
+#Create butterfly dataset
+
+butterflies <- pollinators %>%
+  filter(Group == "Butterfly") %>%
+  mutate(
+    Plant.Species = case_when(
+      Plant.ID %in% c(1, 7) ~ "Hypochaeris radicata",
+      Plant.ID == 2 ~ "Dianthus deltoides",
+      Plant.ID %in% c(3, 8) ~ "Thymus drucei",
+      Plant.ID %in% c(4, 9) ~ "Lotus corniculatus",
+      Plant.ID %in% c(5, 10) ~ "Silene viscaria",
+      Plant.ID == 6 ~ "Galium saxatile",
+      Plant.ID == 11 ~ "Teucrium scorodonia",
+      Plant.ID %in% c(12, 13) ~ "Galium verum",
+      Plant.ID == 14 ~ "Cirsium arvense",
+      TRUE ~ NA_character_
+    )
+  )
+
+#Calculate total butterfly visits at each site
+
+butterfly_visits_by_site <- butterflies %>%
+  group_by(Site) %>%
+  summarise(
+    Butterfly.Visits = sum(Visits, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Percent = 100 * Butterfly.Visits /
+      sum(Butterfly.Visits)
+  )
+
+butterfly_visits_by_site
+
+#Identify plant species present at both sites
+
+plants_by_site <- pollinators %>%
+  mutate(
+    Plant.Species = case_when(
+      Plant.ID %in% c(1, 7) ~ "Hypochaeris radicata",
+      Plant.ID == 2 ~ "Dianthus deltoides",
+      Plant.ID %in% c(3, 8) ~ "Thymus drucei",
+      Plant.ID %in% c(4, 9) ~ "Lotus corniculatus",
+      Plant.ID %in% c(5, 10) ~ "Silene viscaria",
+      Plant.ID == 6 ~ "Galium saxatile",
+      Plant.ID == 11 ~ "Teucrium scorodonia",
+      Plant.ID %in% c(12, 13) ~ "Galium verum",
+      Plant.ID == 14 ~ "Cirsium arvense",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Plant.Species)) %>%
+  distinct(Site, Plant.Species)
+
+shared_plants <- plants_by_site %>%
+  count(Plant.Species) %>%
+  filter(n >= 2) %>%
+  pull(Plant.Species)
+
+shared_plants
+
+#Calculate butterfly visits to plants present at both sites
+
+butterfly_shared_plant_visits <- butterflies %>%
+  mutate(
+    Shared.Plant = Plant.Species %in% shared_plants
+  ) %>%
+  group_by(Site) %>%
+  summarise(
+    Total.Butterfly.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    Visits.to.Shared.Plants = sum(
+      Visits[Shared.Plant],
+      na.rm = TRUE
+    ),
+    Percent.to.Shared.Plants =
+      100 * Visits.to.Shared.Plants /
+      Total.Butterfly.Visits,
+    .groups = "drop"
+  )
+
+butterfly_shared_plant_visits
+
+#Calculate butterfly visits to each plant species at each site
+
+butterfly_plant_breakdown <- butterflies %>%
+  group_by(
+    Site,
+    Plant.Species
+  ) %>%
+  summarise(
+    Butterfly.Visits = sum(
+      Visits,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  ) %>%
+  group_by(Site) %>%
+  mutate(
+    Percent.of.Site.Butterfly.Visits =
+      100 * Butterfly.Visits /
+      sum(Butterfly.Visits)
+  ) %>%
+  arrange(
+    Site,
+    desc(Butterfly.Visits)
+  )
+
+butterfly_plant_breakdown
+
+abundance_table <- pollinators %>%
+  dplyr::select(
+    Site,
+    Block,
+    Plant.ID,
+    Abundance
+  ) %>%
+  distinct() %>%
+  arrange(
+    Site,
+    Plant.ID,
+    Block
+  )
+
+abundance_table
+pollinators %>%
+  dplyr::select(
+    Site,
+    Block,
+    Plant.ID,
+    Species,
+    Abundance
+  ) %>%
+  distinct() %>%
+  arrange(
+    Site,
+    Plant.ID,
+    Block
+  )
+pollinators %>%
+  filter(Plant.ID == 13) %>%
+  dplyr::select(
+    Date,
+    Block,
+    Replication,
+    Abundance
+  ) %>%
+  distinct() %>%
+  arrange(Date, Replication)
+

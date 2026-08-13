@@ -22,13 +22,13 @@ None,04/06/2026,None,None,None,None,None,0,1,1,2,2,6,20,241:260,1900,10:53,20,26
 13,04/06/2026,Bombus pratorum,Bombus,Apidae,Hymenoptera,Bumblebee,4,1,1,2,2,8,20,281:300,2954,11:57,20,286,17.6,70.5,0.1
 14,04/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,3,1,1,2,2,8,20,281:300,2954,11:57,20,286,17.6,70.5,0.1
 15,04/06/2026,Bombus pascuorum,Bombus,Apidae,Hymenoptera,Bumblebee,2,1,1,2,2,8,20,281:300,2954,11:57,20,286,17.6,70.5,0.1
-16,04/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,1,2,2,8,20,281:300,43,11:57,20,286,17.6,70.5,0.1
+16,04/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,1,2,2,8,20,281:300,2954,11:57,20,286,17.6,70.5,0.1
 17,04/06/2026,Eupeodes corollae,Eupeodes,Syrphidae,Diptera,Hoverfly,3,1,1,2,1,5,20,301:320,43,13:03,20,28.8,18.8,76,0
 18,04/06/2026,Bombus pascuorum,Bombus,Apidae,Hymenoptera,Bumblebee,4,1,1,2,1,5,20,301:320,43,13:03,20,28.8,18.8,76,0
 19,04/06/2026,Bombus pratorum,Bombus,Apidae,Hymenoptera,Bumblebee,1,1,1,2,1,2,20,321:340,582,13:30,20,413,19.4,70.9,3.6
 20,04/06/2026,Bombus pratorum,Bombus,Apidae,Hymenoptera,Bumblebee,1,1,1,2,1,3,20,341:360,22444,13:50,20,1234,21,70.3,3.3
 None,04/06/2026,None,None,None,None,None,0,1,1,2,1,4,20,361:380,1291,14:21,20,333,20.9,62.6,1.6
-None,04/06/2026,None,None,None,None,None,0,1,1,2,1,1,20,381:400,582,14:41,20,988,18.1,61.2,6.8
+None,04/06/2026,None,None,None,None,None,0,1,1,2,1,1,20,381:400,469,14:41,20,988,18.1,61.2,6.8
 21,04/06/2026,Sphaerophoria scripta,Sphaerophoria,Syrphidae,Diptera,Hoverfly,1,1,1,3,1,5,20,401:420,43,15:07,20,876,17.8,73.3,2.5
 22,04/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,1,1,1,3,1,5,20,421:440,43,15:07,20,876,17.8,73.3,2.5
 23,04/06/2026,Bombus pratorum,Bombus,Apidae,Hymenoptera,Bumblebee,12,1,1,3,1,3,20,421:440,22444,15:31,20,933,18.4,62.8,1.2
@@ -47,7 +47,7 @@ None,04/06/2026,None,None,None,None,None,0,1,1,3,2,6,20,501:520,1900,17:52,20,19
 33,04/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,1,3,2,8,20,541:560,2954,18:17,20,109.6,17.8,61.2,0.3
 34,04/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,1,3,2,7,20,541:560,210,18:43,20,147.6,17.5,64.8,0.1
 None,04/06/2026,None,None,None,None,None,0,1,1,3,2,9,20,561:580,320,19:02,20,99.7,16.3,64.2,0.3
-None,04/06/2026,None,None,None,None,None,0,1,1,3,2,10,20,581:600,43,19:24,20,88.5,16.2,68.2,0.8
+None,04/06/2026,None,None,None,None,None,0,1,1,3,2,10,20,581:600,170,19:24,20,88.5,16.2,68.2,0.8
 None,05/06/2026,None,None,None,None,None,0,1,2,1,2,6,50,601:650,1900,05:15,20,32.9,14,58.2,1.3
 None,05/06/2026,None,None,None,None,None,0,1,2,1,2,10,50,651:700,170,05:40,20,37.5,13.3,59.2,1.6
 None,05/06/2026,None,None,None,None,None,0,1,2,1,2,7,20,701:720,210,06:05,20,44.7,12.5,63.7,1.8
@@ -55,7 +55,7 @@ None,05/06/2026,None,None,None,None,None,0,1,2,1,2,9,50,721:770,320,06:30,20,48.
 None,05/06/2026,None,None,None,None,None,0,1,2,1,2,8,50,771:820,2954,06:53,20,35.7,10.5,70.5,1.1
 None,05/06/2026,None,None,None,None,None,0,1,2,1,1,1,20,821:840,469,07:58,20,424,15.4,63.7,0.3
 None,05/06/2026,None,None,None,None,None,0,1,2,1,1,2,17,841:857,582,08:20,20,702,13.3,59.9,4.2
-None,05/06/2026,None,None,None,None,None,0,1,2,1,1,5,43,858:900,1291,08:45,20,40.7,16.6,59.9,0.6
+None,05/06/2026,None,None,None,None,None,0,1,2,1,1,5,43,858:900,43,08:45,20,40.7,16.6,59.9,0.6
 None,05/06/2026,None,None,None,None,None,0,1,2,1,1,4,50,901:950,1291,09:13,20,625,14.8,58.9,3.1
 35,05/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,21,1,2,1,1,3,50,951:1000,22444,09:42,20,802,17.3,57.7,1.6
 36,05/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,8,1,2,1,1,3,50,951:1000,22444,09:42,20,802,17.3,57.7,1.6
@@ -63,10 +63,10 @@ None,05/06/2026,None,None,None,None,None,0,1,2,1,1,4,50,901:950,1291,09:13,20,62
 38,05/06/2026,NA,NA,NA,Diptera,Other Fly,6,1,2,1,1,3,50,951:1000,22444,09:42,20,802,17.3,57.7,1.6
 39,05/06/2026,Lycaena phlaeas,Lycaena,Lycaenidae,Lepidoptera,Butterfly,1,1,2,1,1,3,50,951:1000,22444,09:42,20,802,17.3,57.7,1.6
 None,05/06/2026,None,None,None,None,None,0,1,2,2,1,4,50,1001:1050,1291,10:11,20,785,21.2,42.5,2.7
-None,06/06/2026,None,None,None,None,None,0,1,2,2,1,2,17,1051:1067,582,10:41,20,935,20.2,48.2,4.5
+None,05/06/2026,None,None,None,None,None,0,1,2,2,1,2,17,1051:1067,582,10:41,20,935,20.2,48.2,4.5
 40,05/06/2026,NA,NA,NA,Diptera,Other Fly,2,1,2,2,1,1,20,1068:1087,469,11:05,20,790,22.9,46.6,1.2
-41,05/06/2026,NA,NA,NA,Diptera,Other Fly,2,1,2,2,1,1,50,1068:1087,469,11:05,20,790,22.9,46.6,1.2
-42,05/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,2,2,1,1,50,1068:1087,469,11:05,20,790,22.9,46.6,1.2
+41,05/06/2026,NA,NA,NA,Diptera,Other Fly,2,1,2,2,1,1,20,1068:1087,469,11:05,20,790,22.9,46.6,1.2
+42,05/06/2026,NA,NA,NA,Diptera,Other Fly,1,1,2,2,1,1,20,1068:1087,469,11:05,20,790,22.9,46.6,1.2
 43,05/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,39,1,2,2,1,5,43,1088:1130,43,11:30,20,289,22.6,48.1,1.6
 44,05/06/2026,Platycheirus manicatus,Platycheirus,Syrphidae,Diptera,Hoverfly,3,1,2,2,1,5,43,1088:1130,43,11:30,20,289,22.6,48.1,1.6
 45,05/06/2026,Platycheirus manicatus,Platycheirus,Syrphidae,Diptera,Hoverfly,2,1,2,2,1,5,43,1088:1130,43,11:30,20,289,22.6,48.1,1.6
@@ -118,7 +118,7 @@ None,05/06/2026,None,None,None,None,None,0,1,2,3,2,6,50,1571:1620,1900,16:52,20,
 89,05/06/2026,Bombus pratorum,Bombus,Apidae,Hymenoptera,Bumblebee,17,1,2,3,1,3,50,1621:1670,22444,17:52,20,49,17.1,53,1.2
 None,05/06/2026,None,None,None,None,None,0,1,2,3,1,4,50,1671:1720,1291,18:14,20,99.1,14.2,69.1,0.9
 None,05/06/2026,None,None,None,None,None,0,1,2,3,1,5,43,1721:1763,43,18:35,20,79.5,14.4,84.3,0
-None,05/06/2026,None,None,None,None,None,0,1,2,3,1,2,50,1764:1783,582,18:57,20,96.1,14.8,77.5,0.8
+None,05/06/2026,None,None,None,None,None,0,1,2,3,1,2,17,1764:1783,582,18:57,20,96.1,14.8,77.5,0.8
 90,05/06/2026,NA,NA,NA,Diptera,None,1,1,2,3,1,1,20,1784:1803,469,19:18,20,71.7,14.3,64.7,1.6
 None,15/06/2026,None,None,None,None,None,0,1,3,1,1,2,100,1804:1903,582,05:05,20,363,16.8,61.8,1.7
 None,15/06/2026,None,None,None,None,None,0,1,3,1,1,3,100,1904:2003,22444,05:30,20,49.5,15.4,62.4,1.4
@@ -208,7 +208,7 @@ None,24/06/2026,None,None,None,None,None,0,2,4,1,2,6,100,4112:4211,1900,08:04,20
 155,24/06/2026,NA,NA,Syrphidae,Diptera,Hoverfly,2,2,4,1,1,1,100,4412:4511,1020,09:25,20,799,34.9,35,0
 156,24/06/2026,Thymelicus sylvestris,Thymelicus,Hesperiidae,Lepidoptera,Butterfly,24,2,4,1,1,1,100,4412:4511,1020,09:25,20,799,34.9,35,0
 157,24/06/2026,NA,NA,Halictidae,Hymenoptera,Sweat Bee,6,2,4,1,1,1,100,4412:4511,1020,09:25,20,799,34.9,35,0
-158,24/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,11,2,4,1,1,3,100,4512:4611,1477,09:46,20,777,34.7,38.2,0.5
+158,24/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,11,2,4,1,1,3,100,4512:4611,11222,09:46,20,777,34.7,38.2,0.5
 159,24/06/2026,Thymelicus sylvestris,Thymelicus,Hesperiidae,Lepidoptera,Butterfly,2,2,4,1,1,2,100,4612:4711,622,10:07,20,748,34.3,36.9,2.1
 160,24/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,1,2,4,1,1,2,100,4612:4711,622,10:07,20,748,34.3,36.9,2.1
 161,24/06/2026,NA,NA,Syrphidae,Diptera,Hoverfly,2,2,4,2,1,4,100,4712:4811,483,10:31,20,884,31.1,42.1,2.5
@@ -245,11 +245,11 @@ None,24/06/2026,None,None,None,None,None,0,2,4,2,2,6,100,5453:5552,1900,14:39,20
 189,24/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,2,2,4,3,2,9,100,5553:5652,238,15:00,20,948,37.7,29.3,0.7
 None,24/06/2026,None,None,None,None,None,0,2,4,3,2,10,16,5653:5678,16,15:21,20,875,36.9,32,1
 None,24/06/2026,None,None,None,None,None,0,2,4,3,2,6,100,5679:5778,1900,15:44,20,797,34.7,34.1,0
-190,24/06/2026,Bombus pascuorum,Bombus,Apidae,Hymenoptera,Bumblebee,5,2,4,3,2,8,100,5779:5878,11222,16:07,20,673,33.9,33.5,1
-191,24/06/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,18,2,4,3,2,8,100,5779:5878,11222,16:07,20,673,33.9,33.5,1
-192,24/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,3,2,4,3,2,8,100,5779:5878,11222,16:07,20,673,33.9,33.5,1
-193,24/06/2026,Vanessa cardui,Vanessa,Nymphalidae,Lepidoptera,Butterfly,16,2,4,3,2,8,100,5779:5878,11222,16:07,20,673,33.9,33.5,1
-194,24/06/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,7,2,4,3,2,8,100,5779:5878,11222,16:07,20,673,33.9,33.5,1
+190,24/06/2026,Bombus pascuorum,Bombus,Apidae,Hymenoptera,Bumblebee,5,2,4,3,2,8,100,5779:5878,1477,16:07,20,673,33.9,33.5,1
+191,24/06/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,18,2,4,3,2,8,100,5779:5878,1477,16:07,20,673,33.9,33.5,1
+192,24/06/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,3,2,4,3,2,8,100,5779:5878,1477,16:07,20,673,33.9,33.5,1
+193,24/06/2026,Vanessa cardui,Vanessa,Nymphalidae,Lepidoptera,Butterfly,16,2,4,3,2,8,100,5779:5878,1477,16:07,20,673,33.9,33.5,1
+194,24/06/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,7,2,4,3,2,8,100,5779:5878,1477,16:07,20,673,33.9,33.5,1
 None,24/06/2026,None,None,None,None,None,0,2,4,3,2,7,25,5879:5903,191,16:28,20,896,34.6,34.1,1.1
 195,24/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,2,2,4,3,1,4,100,5904:6003,483,17:27,20,537,38.2,26.3,0.1
 196,24/06/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,6,2,4,3,1,4,100,5904:6003,483,17:27,20,537,38.2,26.3,0.1
@@ -277,7 +277,7 @@ None,02/07/2026,None,None,None,None,None,0,2,5,1,2,13,100,7018:7117,16034,09:22,
 210,02/07/2026,Bombus lapidarius,Bombus,Apidae,Hymenoptera,Bumblebee,18,2,5,1,2,14,100,7118:7217,2796,09:45,20,936,32.4,32.7,2.2
 211,02/07/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,6,2,5,1,2,14,100,7118:7217,2796,09:45,20,936,32.4,32.7,2.2
 212,02/07/2026,Sphaerophoria scripta,Sphaerophoria,Syrphidae ,Diptera,Hoverfly,2,2,5,1,2,14,100,7118:7217,2796,09:45,20,936,32.4,32.7,2.2
-213,02/07/2026,Sphex nudus,Sphex,Sphecidae,Hymenoptera,Wasp,2,2,5,2,2,9,100,7218:7317,483,10:53,20,276,29.7,32.4,1.1
+213,02/07/2026,Sphex nudus,Sphex,Sphecidae,Hymenoptera,Wasp,2,2,5,2,2,9,100,7218:7317,238,10:53,20,276,29.7,32.4,1.1
 None,02/07/2026,None,None,None,None,None,0,2,5,2,2,7,43,7318:7360,191,11:34,20,924,22.4,42.5,1.2
 214,02/07/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,2,2,5,2,2,14,100,7361:7460,2796,12:05,20,442,23.4,42.1,1.5
 215,02/07/2026,NA,NA,NA,Diptera,Other Fly,1,2,5,2,2,14,100,7361:7460,2796,12:05,20,442,23.4,42.1,1.5
@@ -337,7 +337,7 @@ None,04/07/2026,None,None,None,None,None,0,2,6,2,2,9,100,10365:10464,238,14:23,2
 246,04/07/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,3,2,6,2,2,14,100,10465:10564,2796,14:45,20,256,21.2,60.4,1.1
 None,04/07/2026,None,None,None,None,None,0,2,6,3,2,13,100,10565:10664,8017,15:05,20,254,21.4,60.4,0
 None,04/07/2026,None,None,None,None,None,0,2,6,3,2,9,100,10665:10764,238,15:26,20,172,22.2,58.6,0.9
-None,04/07/2026,None,None,None,None,None,0,2,6,3,2,7,60,10765:10824,238,15:46,20,142,22.1,59.1,0.1
+None,04/07/2026,None,None,None,None,None,0,2,6,3,2,7,60,10765:10824,191,15:46,20,142,22.1,59.1,0.1
 247,04/07/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,3,2,6,3,2,14,100,10825:10924,2796,16:08,20,318,21.7,61.5,1.9
 248,04/07/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,8,2,6,3,2,14,100,10825:10924,2796,16:08,20,318,21.7,61.5,1.9
 249,04/07/2026,Apis mellifera,Apis,Apidae,Hymenoptera,Honeybee,1,2,6,3,2,14,100,10825:10924,2796,16:08,20,318,21.7,61.5,1.9
@@ -353,4 +353,4 @@ None,04/07/2026,None,None,None,None,None,0,2,6,3,1,2,100,11025:11124,622,17:20,2
 257,04/07/2026,NA,NA,NA,Diptera,Other Fly,3,2,6,3,1,11,100,11125:11224,16034,17:41,20,71.7,21.2,58.9,0.4
 258,04/07/2026,Bombus terrestris,Bombus,Apidae,Hymenoptera,Bumblebee,7,2,6,3,1,11,100,11125:11224,16034,17:41,20,71.7,21.2,58.9,0.4
 None,04/07/2026,None,None,None,None,None,0,2,6,3,1,4,100,11225:11324,483,18:03,20,115,20.5,64.7,2.6
-None,04/07/2026,None,None,None,None,None,0,2,6,3,1,1,100,11325:11434,483,18:25,20,119,20,61.6,0
+None,04/07/2026,None,None,None,None,None,0,2,6,3,1,1,100,11325:11434,1020,18:25,20,119,20,61.6,0
