@@ -1,0 +1,7 @@
+"Site","Metric","Observed","Null_Mean_R2d","Null_SD_R2d","z_R2d","p_R2d","Null_Mean_VazNull","Null_SD_VazNull","z_VazNull","p_VazNull"
+"Site 1","Modularity Q",0.468,0.071,0.008,50.79,0.004,0.143,0.021,15.66,0.004
+"Site 1","Connectance",0.349,0.72,0.02,-18.54,0.004,NA,NA,NA,NA
+"Site 1","Weighted NODF",23.364,64.97,3.701,-11.24,0.004,47.843,5.007,-4.89,0.004
+"Site 2","Modularity Q",0.324,0.03,0.006,46.99,0.004,0.05,0.008,32.89,0.004
+"Site 2","Connectance",0.429,0.646,0.029,-7.6,0.004,NA,NA,NA,NA
+"Site 2","Weighted NODF",36.61,65.267,4.687,-6.11,0.004,59.634,5.449,-4.23,0.004
