@@ -17,6 +17,11 @@ This repository is organised into several sub-directories.
 `Scripts/` contains the annotated R scripts used for data processing, statistical analyses, community analyses, and plant–pollinator network analyses.
 
 `Figures/` contains figures and plots produced from the analyses.
+ 
+`Model Outputs/` contains CSV files of the statistical model outputs reported in the dissertation.
+
+`QGIS/` contains a shape file with maps of both surveyed sites.
+
 
 ## FAIR Data Principles
 
