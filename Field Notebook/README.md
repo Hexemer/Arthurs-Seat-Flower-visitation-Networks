@@ -1,4 +1,4 @@
-I# Field Notebook
+# Field Notebook
 
 Images of field notebook pages recorded during pollinator surveys at Arthur's Seat, Edinburgh.
 
