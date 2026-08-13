@@ -27,6 +27,6 @@ Some terminology within the scripts reflects naming conventions established duri
 In particular:
 
 - **Pollinators** refers to **floral visitors**. Visitation was measured, rather than successful pollination.
-- **Native species** refers to **non-restored plant species**. This terminology does not indicate or assess the native status of individual plant species.
+- **Native species** refers to **non-restored plant species**. While they are native they have been renamed in the dissertation to more accurately distinguish them from the restored plant populations included in the study.
 
 These distinctions should be considered when interpreting variable names, objects, comments, and outputs within the scripts.
