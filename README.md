@@ -1,6 +1,6 @@
 # Arthur's Seat Pollination Networks
 
-This repository contains raw data, annotated R code, and figures used to analyse plant–pollinator interactions at restored wildflower populations on Arthur's Seat, Edinburgh, Scotland. The study investigated pollinator visitation, plant–pollinator network structure, pollinator community composition, and the sharing of pollinator taxa between restored and co-flowering plant species.
+This repository contains raw data, annotated R code (version 4.6.0), and figures used to analyse plant–pollinator interactions at restored wildflower populations on Arthur's Seat, Edinburgh, Scotland. The study investigated pollinator visitation, plant–pollinator network structure, pollinator community composition, and the sharing of pollinator taxa between restored and co-flowering plant species.
 
 Pollinator visitation surveys were conducted at two sites within Holyrood Park. During each survey, plant and pollinator identity, pollinator visits, floral abundance, time period, and environmental conditions were recorded. Environmental variables included temperature, solar radiation, relative humidity, and wind speed.
 
