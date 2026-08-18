@@ -4,9 +4,9 @@ This repository contains raw data, annotated R code (version 4.6.0), and figures
 
 Flower visitation surveys were conducted at two sites within Holyrood Park. During each survey, plant and visitor identity, flower-visitor visits, floral abundance, time period, and environmental conditions were recorded. Environmental variables included temperature, solar radiation, relative humidity, and wind speed.
 
-Pollinators were identified to the lowest reliable taxonomic level possible in the field.
+Flower-visitors were identified to the lowest reliable taxonomic level possible in the field.
 
-The data were used to investigate temporal and spatial variation in visitation, environmental drivers of visitation, differences among pollinator groups, plant species attractiveness, pollinator community composition, and plant–pollinator network structure.
+The data were used to investigate temporal and spatial variation in visitation, environmental drivers of visitation, differences among flower-visitor groups, plant species attractiveness, flower-visitor community composition, and flower-visitation network structure.
 
 ## Repository Structure
 
