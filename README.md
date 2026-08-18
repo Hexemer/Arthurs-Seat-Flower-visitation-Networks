@@ -1,10 +1,10 @@
 # Arthur's Seat Flower-Visitation Networks
 
-This repository contains raw data, annotated R code (version 4.6.0), and figures used to analyse flower-visitor interactions at restored wildflower populations on Arthur's Seat, Edinburgh, Scotland. The study investigated  visitation, flower-visitor network structure, flower visitor community composition, and the sharing of flower visitor taxa between restored and non-restored plant species.
+This repository contains raw data, annotated R code (version 4.6.0), and figures used to analyse flower-visitor interactions at restored wildflower populations on Arthur's Seat, Edinburgh, Scotland. The study investigated visitation, flower-visitor network structure, flower-visitor community composition, and the sharing of flower-visitor taxa between restored and non-restored plant species.
 
-Flower visitation surveys were conducted at two sites within Holyrood Park. During each survey, plant and visitor identity, flower-visitor visits, floral abundance, time period, and environmental conditions were recorded. Environmental variables included temperature, solar radiation, relative humidity, and wind speed.
+Flower-visitation surveys were conducted at two sites within Holyrood Park. During each survey, plant and visitor identity, flower visits, floral abundance, time period, and environmental conditions were recorded. Environmental variables included temperature, solar radiation, relative humidity, and wind speed.
 
-Flower-visitors were identified to the lowest reliable taxonomic level possible in the field.
+Flower visitors were identified to the lowest reliable taxonomic level possible in the field.
 
 The data were used to investigate temporal and spatial variation in visitation, environmental drivers of visitation, differences among flower-visitor groups, plant species attractiveness, flower-visitor community composition, and flower-visitation network structure.
 
@@ -12,16 +12,15 @@ The data were used to investigate temporal and spatial variation in visitation, 
 
 This repository is organised into several sub-directories.
 
-`Raw Data/` contains the original pollinator visitation datasets in CSV and XLSX format.
+`Raw Data/` contains the original flower-visitation datasets in CSV and XLSX format.
 
-`Scripts/` contains the annotated R scripts used for data processing, statistical analyses, community analyses, and plant–pollinator network analyses.
+`Scripts/` contains the annotated R scripts used for data processing, statistical analyses, community analyses, and flower-visitation network analyses.
 
 `Figures/` contains figures and plots produced from the analyses.
- 
+
 `Model Outputs/` contains CSV files of the statistical model outputs reported in the dissertation.
 
-`QGIS/` contains a shape file with maps of both surveyed sites.
-
+`QGIS/` contains a shapefile with maps of both surveyed sites.
 
 ## FAIR Data Principles
 
@@ -35,4 +34,4 @@ This repository is organised into several sub-directories.
 
 ## Contact
 
-For questions about this dataset, please contact Kirsten Hexemer at [s2898010@ed.ac.uk](mailto:s2898010@ed.ac.uk).
+For questions about this dataset, please contact Kirsten Hexemer at s2898010@ed.ac.uk.
